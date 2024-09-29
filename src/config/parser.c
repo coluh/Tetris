@@ -43,7 +43,6 @@ static bool in(char c, char *string) {
 }
 // TODO: will produce Segmentation Fault when deal with wrong config file
 static void parsekv(char *buf, char **k, char **v) {
-	/* int w1s, w1e, w2s, w2e; // word 1/2 start/end */
 	int i = 0;;
 	while (buf[i] == ' ' || buf[i] == '\t')
 		i++;
@@ -86,6 +85,8 @@ Table *readConfig(const char *path) {
 		readline(fp, buf, sizeof(buf));
 		if (buf[0] == '\0' || buf[0] == '#' || buf[0] == '[' || buf[0] == '\n')
 			continue;
+		if (feof(fp))
+			break;
 		char *k;
 		char *v;
 		parsekv(buf, &k, &v);
