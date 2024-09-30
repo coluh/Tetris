@@ -9,6 +9,8 @@ int main(int argc, char *argv[]) {
 
 	initRender();
 	loadConfig("./config/");
+	initMenuConfig();
+	loadConfig("./config/");
 
 	Menu *start = new_Menu(800, 700);
 	addMenuEntry(start, "Single Player", singlePlayer);

@@ -21,6 +21,10 @@
  */
 
 static void readline(FILE *fp, char *buf, int n) {
+	if (feof(fp)) {
+		buf[0] = '\0';
+		return;
+	}
 	char ch;
 	int i = 0;
 	while ((ch = fgetc(fp)) != '\n') {
@@ -35,9 +39,9 @@ static void readline(FILE *fp, char *buf, int n) {
 	buf[i] = '\0';
 }
 
-static bool in(char c, char *string) {
-	for (int i = 0; string[i] != '\0'; i++)
-		if (c == string[i])
+static bool in(char c, const char *cs, int cs_len) {
+	for (int i = 0; i < cs_len; i++)
+		if (c == cs[i])
 			return true;
 	return false;
 }
@@ -59,7 +63,7 @@ static void parsekv(char *buf, char **k, char **v) {
 		i++;
 
 	char *word2 = &buf[i];
-	while (!in(buf[i], "\n\t#[\0"))
+	while (!in(buf[i], "\0\t\n #[", 6))
 		i++;
 	buf[i] = '\0';
 
@@ -94,6 +98,12 @@ Table *readConfig(const char *path) {
 		en->key = k;
 		en->value = v;
 		addEntry(t, en);
+	}
+	fclose(fp);
+	if (t->data == NULL) {
+		Debug("config file %s%s%s is empty", CSI_GREEN, path, CSI_END);
+		free(t);
+		return NULL;
 	}
 	return t;
 }

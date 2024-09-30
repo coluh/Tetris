@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "render.h"
 #include "common/utils.h"
+#include "config/config.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -14,15 +15,26 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const SDL_Color FONTCOLOR_INACTIVE = {255, 255, 255, 255};
-static const SDL_Color FONTCOLOR_ACTIVE = {0, 255, 0, 255};
-static const SDL_Color ENTRYCOLOR_INACTIVE = {0, 0, 0, 0};
-static const SDL_Color ENTRYCOLOR_ACTIVE = {0, 0, 0, 127};
-static const SDL_Color MENUCOLOR = {40, 120, 255, 255};
+// config variables
+static SDL_Color FONTCOLOR_INACTIVE = {255, 255, 255, 255};
+static SDL_Color FONTCOLOR_ACTIVE = {0, 255, 0, 255};
+static SDL_Color ENTRYCOLOR_INACTIVE = {0, 0, 0, 0};
+static SDL_Color ENTRYCOLOR_ACTIVE = {0, 0, 0, 127};
+static SDL_Color MENUCOLOR = {40, 120, 255, 255};
 
-static int padding = 20;
-static int margin = 5;
+static int paddingH = 20;
+static int paddingV = 20;
+static int marginH = 5;
+static int marginV = 5;
 int fontsize = 48;
+
+void initMenuConfig() {
+	fontsize = getConfigModule("layout")->getInt("FontSize");
+	paddingH = getConfigModule("layout")->getInt("PaddingH");
+	paddingV = getConfigModule("layout")->getInt("PaddingV");
+	marginH = getConfigModule("layout")->getInt("MarginH");
+	marginV = getConfigModule("layout")->getInt("MarginV");
+}
 
 struct MenuEntry {
 	const char *string;
@@ -73,7 +85,7 @@ void addMenuEntry(Menu *m, const char *string, void (*func)(void)) {
 
 // assign locations for menu and each menu entry
 static void assignLocations(Menu *m) {
-	int total_height = m->list_len * (fontsize + padding * 2 + margin * 2) - margin * 2;
+	int total_height = m->list_len * (fontsize + paddingV * 2 + marginV * 2) - marginV * 2;
 	if (total_height > m->h) Warning("Menu Entrys overflow in y");
 	int starty = (m->h - total_height) / 2;
 
@@ -88,14 +100,14 @@ static void assignLocations(Menu *m) {
 	 * */
 	for (int i = 0; i < m->list_len; i++) {
 		 /* m->list[i].w = m->list[i].text_w + 2 * padding; */
-		 m->list[i].h = m->list[i].text_h + 2 * padding;
-		 m->list[i].y = starty + padding + i * (fontsize + 2 * padding + 2 * margin);
+		 m->list[i].h = m->list[i].text_h + 2 * paddingV;
+		 m->list[i].y = starty + paddingV + i * (fontsize + 2 * paddingV + 2 * marginV);
 	}
 	int total_width = 0;
 	for (int i = 0; i < m->list_len; i++)
 		if (m->list[i].text_w > total_width)
 			total_width = m->list[i].text_w;
-	total_width += padding * 2;
+	total_width += paddingH * 2;
 	Debug("total_width: %d\tm->w:%d", total_width, m->w);
 	if (total_width > m->w) Warning("Menu Entrys overflow in x");
 	for (int i = 0; i < m->list_len; i++) {
@@ -133,7 +145,7 @@ static void drawMenu(Menu *m) {
 			SDL_SetRenderDrawColor(r, ColorUnpack(ENTRYCOLOR_INACTIVE));
 		rect = (SDL_Rect) {this->x, this->y, this->w, this->h};
 		SDL_RenderFillRect(r, &rect);
-		SDL_Rect dst = {this->x + padding, this->y + padding, this->text_w, this->text_h};
+		SDL_Rect dst = {this->x + paddingH, this->y + paddingV, this->text_w, this->text_h};
 		if (this->active)
 			SDL_RenderCopy(r, this->text_active, NULL, &dst);
 		else

@@ -6,23 +6,28 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <unistd.h>
 
 typedef struct Config {
-	const char *configDir;
+	char *configDir;
 	ConfigModule *modules;
 } Config;
 
 static Config config;
 static ConfigModule *this;
 
-ConfigModule *getConfigModule(const char *name) {
+ConfigModule *getConfigModule(const char *filename) {
+	char *name = malloc(strlen(filename) + 1);
+	strcpy(name, filename);
+	if (strstr(name, ".cfg"))
+		*strstr(name, ".cfg") = '\0';
 	for (ConfigModule *p = config.modules; p != NULL; p = p->next) {
 		if (strcmp(p->name, name) == 0) {
 			this = p;
 			return this;
 		}
 	}
-	Error("Config Module Not Found");
+	Debug("Config Module %s Not Found", name);
 	return NULL;
 }
 
@@ -37,17 +42,33 @@ void loadConfig(const char *configDir) {
 
 	DIR *dp = opendir(configdir);
 	Assert(dp != NULL, "configdir not found");
+	if(!config.configDir) {
+		/*char cwd[128];*/
+		/*getcwd(cwd, 128);*/
+		/*Debug("Current Directory: %s\n", cwd);*/
+		config.configDir = malloc(strlen(configdir) + 1);
+		strcpy(config.configDir, configdir);
+		Debug("config dir: %s", config.configDir);
+	}
 	struct dirent *entry;
 	while ((entry = readdir(dp))) {
 		const char *filename = entry->d_name;
 		if (filename[0] == '.')
 			continue;
+		if (!strstr(filename, ".cfg")) {
+			continue;
+		} else {
+			Debug("find config file: %s%s", CSI_GREEN, filename);
+		}
+		if (getConfigModule(filename)) {
+			Debug("Module %s already load", filename);
+			continue;// TODO: reload config
+		}
 		char path[512];
 		snprintf(path, sizeof(path), "%s/%s", configdir, filename);
 		Table *table = readConfig(path);
 		if (!table) {
-			Warning("Skip a file in dir");
-			Debug("that file is %s, %s", filename, path);
+			Debug("Skip %s%s", CSI_GREEN, path);
 			continue;
 		}
 
@@ -71,16 +92,18 @@ void writeToFile() {
 	Error("Not_Implement");
 }
 
-static void addModule(const char *name, Table *data) {
+static void addModule(const char *filename, Table *data) {
 	ConfigModule **p = &config.modules;
 	for (; *p != NULL; p = &(*p)->next)
 		;
 	*p = calloc(1, sizeof(struct ConfigModule));
 	ConfigModule *this = *p;
-	if (strstr(name, ".cfg")) {
-		*strstr(name, ".cfg") = '\0';
-	}
+
+	char *name = malloc(strlen(filename) + 1);
+	strcpy(name, filename);
+	*strstr(name, ".cfg") = '\0';
 	this->name = name;
+
 	this->data = data;
 	this->getString = getString;
 	this->setString = setString;

@@ -10,7 +10,7 @@ static struct {
 	TTF_Font *font;
 } render;
 
-const SDL_Color BGCOLOR = {0, 0, 127, 255};
+const SDL_Color BGCOLOR = {0, 0, 31, 255};
 
 SDL_Renderer *getRenderer() {
 	SDL_SetRenderDrawColor(render.renderer, ColorUnpack(BGCOLOR));
