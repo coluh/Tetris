@@ -13,6 +13,7 @@ typedef struct Table {
 } Table;
 
 Table *readConfig(const char *path);
+void freeTable(Table *t);
 const char *tableFind(Table *table, const char *key);
 
 #endif // __PARSER_H__

@@ -19,7 +19,7 @@
 #include "parser.h"
 
 typedef struct ConfigModule {
-	const char *name;
+	char *name;
 	Table *data;
 	const char * (*getString)(const char *);
 	void (*setString)(const char *, const char *);
@@ -30,5 +30,6 @@ typedef struct ConfigModule {
 } ConfigModule;
 ConfigModule *getConfigModule(const char *);
 void loadConfig(const char *configDir);
+void freeConfig();
 
 #endif // __CONFIG_H__

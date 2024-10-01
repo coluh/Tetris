@@ -24,10 +24,12 @@ ConfigModule *getConfigModule(const char *filename) {
 	for (ConfigModule *p = config.modules; p != NULL; p = p->next) {
 		if (strcmp(p->name, name) == 0) {
 			this = p;
+			free(name);
 			return this;
 		}
 	}
 	Debug("Config Module %s Not Found", name);
+	free(name);
 	return NULL;
 }
 
@@ -42,14 +44,14 @@ void loadConfig(const char *configDir) {
 
 	DIR *dp = opendir(configdir);
 	Assert(dp != NULL, "configdir not found");
-	if(!config.configDir) {
-		/*char cwd[128];*/
-		/*getcwd(cwd, 128);*/
-		/*Debug("Current Directory: %s\n", cwd);*/
-		config.configDir = malloc(strlen(configdir) + 1);
-		strcpy(config.configDir, configdir);
-		Debug("config dir: %s", config.configDir);
-	}
+
+	/*char cwd[128];*/
+	/*getcwd(cwd, 128);*/
+	/*Debug("Current Directory: %s\n", cwd);*/
+	config.configDir = malloc(strlen(configdir) + 1);
+	strcpy(config.configDir, configdir);
+	Debug("config dir: %s", config.configDir);
+
 	struct dirent *entry;
 	while ((entry = readdir(dp))) {
 		const char *filename = entry->d_name;
@@ -74,6 +76,20 @@ void loadConfig(const char *configDir) {
 
 		addModule(filename, table);
 	}
+	closedir(dp);
+}
+
+static void freeModule(ConfigModule *m) {
+	if (m == NULL)
+		return;
+	freeModule(m->next);
+	free(m->name);
+	freeTable(m->data);
+	free(m);
+}
+void freeConfig() {
+	free(config.configDir);
+	freeModule(config.modules);
 }
 
 const char * getString(const char * key) {

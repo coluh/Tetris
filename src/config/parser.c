@@ -108,6 +108,18 @@ Table *readConfig(const char *path) {
 	return t;
 }
 
+static void freeTableEntry(TableEntry *e) {
+	if (e == NULL)
+		return;
+	freeTableEntry(e->next);
+	free(e->key);
+	free(e->value);
+}
+void freeTable(Table *t) {
+	free(t->data);
+	free(t);
+}
+
 const char *tableFind(Table *table, const char *key) {
 	for (TableEntry *p = table->data; p != NULL; p = p->next) {
 		if (strcmp(p->key, key) == 0)

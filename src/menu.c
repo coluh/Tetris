@@ -26,10 +26,9 @@ static int paddingH = 20;
 static int paddingV = 20;
 static int marginH = 5;
 static int marginV = 5;
-int fontsize = 48;
+extern int fontsize;
 
 void initMenuConfig() {
-	fontsize = getConfigModule("layout")->getInt("FontSize");
 	paddingH = getConfigModule("layout")->getInt("PaddingH");
 	paddingV = getConfigModule("layout")->getInt("PaddingV");
 	marginH = getConfigModule("layout")->getInt("MarginH");
@@ -54,12 +53,12 @@ struct Menu {
 	int list_len;
 };
 
-extern int window_width;
-extern int window_height;
+extern int windowWidth;
+extern int windowHeight;
 Menu *new_Menu(int width, int height) {
 	Menu *m = calloc(1, sizeof(struct Menu));
-	m->x = (window_width - width) / 2;
-	m->y = (window_height - height) / 2;
+	m->x = (windowWidth - width) / 2;
+	m->y = (windowHeight - height) / 2;
 	m->w = width;
 	m->h = height;
 	return m;
@@ -85,9 +84,9 @@ void addMenuEntry(Menu *m, const char *string, void (*func)(void)) {
 
 // assign locations for menu and each menu entry
 static void assignLocations(Menu *m) {
-	int total_height = m->list_len * (fontsize + paddingV * 2 + marginV * 2) - marginV * 2;
+	int total_height = m->list_len * (fontsize + paddingV * 2 + marginV * 2) + 2 * paddingV;
 	if (total_height > m->h) Warning("Menu Entrys overflow in y");
-	int starty = (m->h - total_height) / 2;
+	int starty = (m->h - total_height) / 2 + paddingV + marginV;
 
 	/* +-----------------------+
 	 * |      +----------+     |
@@ -99,21 +98,20 @@ static void assignLocations(Menu *m) {
 	 * +-----------------------+
 	 * */
 	for (int i = 0; i < m->list_len; i++) {
-		 /* m->list[i].w = m->list[i].text_w + 2 * padding; */
 		 m->list[i].h = m->list[i].text_h + 2 * paddingV;
-		 m->list[i].y = starty + paddingV + i * (fontsize + 2 * paddingV + 2 * marginV);
+		 m->list[i].y = starty + i * (fontsize + 2 * paddingV + 2 * marginV);
 	}
-	int total_width = 0;
+	int max_width = 0;
 	for (int i = 0; i < m->list_len; i++)
-		if (m->list[i].text_w > total_width)
-			total_width = m->list[i].text_w;
-	total_width += paddingH * 2;
-	Debug("total_width: %d\tm->w:%d", total_width, m->w);
+		if (m->list[i].text_w > max_width)
+			max_width = m->list[i].text_w;
+	max_width += paddingH * 2;
+	int total_width = max_width + marginH * 2 + paddingH * 2;
 	if (total_width > m->w) Warning("Menu Entrys overflow in x");
+	int startx = (windowWidth - max_width) / 2;
 	for (int i = 0; i < m->list_len; i++) {
-		 int startx = (window_width - total_width) / 2;
 		 m->list[i].x = startx;
-		 m->list[i].w = total_width;
+		 m->list[i].w = max_width;
 	}
 }
 
@@ -151,7 +149,6 @@ static void drawMenu(Menu *m) {
 		else
 			SDL_RenderCopy(r, this->text_inactive, NULL, &dst);
 	}
-	SDL_RenderPresent(r);
 }
 
 static bool running;
@@ -163,6 +160,7 @@ void startMenu(Menu *m) {
 
 		SDL_RenderClear(getRenderer());
 		drawMenu(m);
+		SDL_RenderPresent(getRenderer());
 
 		SDL_WaitEvent(&event);
 		if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN &&

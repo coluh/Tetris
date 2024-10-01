@@ -1,18 +1,21 @@
 #include "render.h"
 #include "config/config.h"
 #include "menu.h"
+#include "block.h"
+#include "input.h"
 
 #include "singleplayer.h"
 #include "settings.h"
 
-int main(int argc, char *argv[]) {
+int main() {
 
+	loadConfig("./config/");
 	initRender();
-	loadConfig("./config/");
 	initMenuConfig();
-	loadConfig("./config/");
+	initBlockConfig();
+	initInput();
 
-	Menu *start = new_Menu(800, 700);
+	Menu *start = new_Menu(1400, 1000);
 	addMenuEntry(start, "Single Player", singlePlayer);
 	addMenuEntry(start, "Settings", settingsPage);
 	addMenuEntry(start, "Exit", stopMenu_ptr);
@@ -21,6 +24,7 @@ int main(int argc, char *argv[]) {
 	// menu exited
 	freeMenu(start);
 	freeRender();
+	freeConfig();
 
 	return 0;
 }

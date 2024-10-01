@@ -13,6 +13,7 @@
 #define CSI_WHITE	"\x1B[1;37m"
 #define CSI_END		"\x1B[0m"
  
+void shuffle(int *array, int n);
 int toInt(const char *string);
 
 #define Rect(x, y, w, h) ((SDL_Rect){x, y, w, h})
@@ -21,7 +22,9 @@ int toInt(const char *string);
 		&& ((my) >= (r).y) && ((my) < (r).y+(r).h))
 
 
-// err handling
+/**
+ * Error Handling
+ * */
 #define Assert(condition, msg) do { \
 	if (!(condition)) { \
 		Error(msg); \

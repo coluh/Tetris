@@ -1,5 +1,6 @@
 #include "render.h"
 #include "common/utils.h"
+#include "config/config.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -11,9 +12,18 @@ static struct {
 } render;
 
 const SDL_Color BGCOLOR = {0, 0, 31, 255};
+int windowWidth = 1400;
+int windowHeight = 800;
+int fontsize = 48;
 
+
+SDL_Window *getWindow() { return render.window; }
 SDL_Renderer *getRenderer() {
 	SDL_SetRenderDrawColor(render.renderer, ColorUnpack(BGCOLOR));
+	return render.renderer;
+}
+SDL_Renderer *getRendererColor(SDL_Color color) {
+	SDL_SetRenderDrawColor(render.renderer, ColorUnpack(color));
 	return render.renderer;
 }
 
@@ -26,15 +36,14 @@ SDL_Texture *createTextTexture(const char *string, SDL_Color color) {
 	return texture;
 }
 
-int window_width = 1400;
-int window_height = 800;
-extern int fontsize;
-
 void initRender() {
+	windowWidth = getConfigModule("layout")->getInt("WindowWidth");
+	windowHeight = getConfigModule("layout")->getInt("WindowHeight");
+	fontsize = getConfigModule("layout")->getInt("FontSize");
 	SDL_Init(SDL_INIT_VIDEO);
 	TTF_Init();
 	render.window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		window_width, window_height, SDL_WINDOW_RESIZABLE);
+		windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
 	if (render.window == NULL) Error(SDL_GetError());
 	render.renderer = SDL_CreateRenderer(render.window, -1, 0);
 	render.font = TTF_OpenFont("./assets/fonts/noto/NotoMono-Regular.ttf", fontsize);

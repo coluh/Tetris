@@ -9,7 +9,9 @@
 
 void initRender();
 void freeRender();
+SDL_Window *getWindow();
 SDL_Renderer *getRenderer();
+SDL_Renderer *getRendererColor(SDL_Color color);
 SDL_Texture *createTextTexture(const char *string, SDL_Color color);
 
 #endif // __RENDER_H__
