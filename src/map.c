@@ -161,7 +161,6 @@ void lock(Map *map) {
 	}
 	free(map->falling);
 	map->falling = NULL;
-	checkLine(map);
 }
 
 int checkLine(Map *map) {

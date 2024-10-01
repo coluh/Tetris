@@ -12,10 +12,18 @@
 
 static SDL_Color BGCOLOR = {0, 127, 233, 255};
 
+static struct {
+	int lines;
+	int level;
+	int score;
+} s;
+
+// TODO: these are to ugly
 static int forward(Map *map, BlockBag *bag) {
 	if (hasFallingBlock(map)) {
 		if (fall(map) != 0) {
 			lock(map);
+			s.lines += checkLine(map);
 			return forward(map, bag);
 		}
 	} else {
@@ -25,6 +33,7 @@ static int forward(Map *map, BlockBag *bag) {
 			// Tetris Guideline asked for this.
 			if (fall(map) != 0) {
 				lock(map);
+				s.lines += checkLine(map);
 				return forward(map, bag);
 			}
 		}
@@ -53,6 +62,8 @@ static int handleInput(Map *map, BlockBag *bag, int opt) {
 		while (move(map, 0, -1) == 0)
 			;
 		lock(map);
+		s.lines += checkLine(map);
+		Debug("Lines: %d", s.lines);
 		return forward(map, bag);
 		break;
 	case OPT_ROTATER:
