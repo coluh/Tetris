@@ -21,6 +21,10 @@
  */
 
 static void readline(FILE *fp, char *buf, int n) {
+	if (feof(fp)) {
+		buf[0] = '\0';
+		return;
+	}
 	char ch;
 	int i = 0;
 	while ((ch = fgetc(fp)) != '\n') {
@@ -35,15 +39,14 @@ static void readline(FILE *fp, char *buf, int n) {
 	buf[i] = '\0';
 }
 
-static bool in(char c, char *string) {
-	for (int i = 0; string[i] != '\0'; i++)
-		if (c == string[i])
+static bool in(char c, const char *cs, int cs_len) {
+	for (int i = 0; i < cs_len; i++)
+		if (c == cs[i])
 			return true;
 	return false;
 }
 // TODO: will produce Segmentation Fault when deal with wrong config file
 static void parsekv(char *buf, char **k, char **v) {
-	/* int w1s, w1e, w2s, w2e; // word 1/2 start/end */
 	int i = 0;;
 	while (buf[i] == ' ' || buf[i] == '\t')
 		i++;
@@ -60,7 +63,7 @@ static void parsekv(char *buf, char **k, char **v) {
 		i++;
 
 	char *word2 = &buf[i];
-	while (!in(buf[i], "\n\t#[\0"))
+	while (!in(buf[i], "\0\t\n #[", 6))
 		i++;
 	buf[i] = '\0';
 
@@ -86,6 +89,8 @@ Table *readConfig(const char *path) {
 		readline(fp, buf, sizeof(buf));
 		if (buf[0] == '\0' || buf[0] == '#' || buf[0] == '[' || buf[0] == '\n')
 			continue;
+		if (feof(fp))
+			break;
 		char *k;
 		char *v;
 		parsekv(buf, &k, &v);
@@ -94,7 +99,25 @@ Table *readConfig(const char *path) {
 		en->value = v;
 		addEntry(t, en);
 	}
+	fclose(fp);
+	if (t->data == NULL) {
+		Debug("config file %s%s%s is empty", CSI_GREEN, path, CSI_END);
+		free(t);
+		return NULL;
+	}
 	return t;
+}
+
+static void freeTableEntry(TableEntry *e) {
+	if (e == NULL)
+		return;
+	freeTableEntry(e->next);
+	free(e->key);
+	free(e->value);
+}
+void freeTable(Table *t) {
+	free(t->data);
+	free(t);
 }
 
 const char *tableFind(Table *table, const char *key) {
@@ -102,5 +125,6 @@ const char *tableFind(Table *table, const char *key) {
 		if (strcmp(p->key, key) == 0)
 			return p->value;
 	}
+	Error("KEY Not Found");
 	return NULL;
 }

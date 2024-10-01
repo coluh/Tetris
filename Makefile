@@ -1,7 +1,7 @@
 
-CFLAGS = -lSDL2 -lSDL2_ttf
+CFLAGS = -lSDL2 -lSDL2_ttf -lm
 # CFLAGS += -Werror -Wall
-CFLAGS += -g -ggdb
+CFLAGS += -g -ggdb -rdynamic
 
 sources := $(shell find src/ -name "*.c" | grep -v "test_")
 objects := $(sources:.c=.o)
