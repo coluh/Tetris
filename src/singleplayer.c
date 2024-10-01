@@ -62,7 +62,12 @@ static int handleInput(Map *map, BlockBag *bag, int opt) {
 		rotate(map, 1);
 		break;
 	case OPT_HOLD:
-		Debug("Hold");
+		if (!hasHold(map)) {
+			hold(map);
+			putBlock(map, popBlock(bag));
+		} else {
+			hold(map);
+		}
 		break;
 	case OPT_PAUSE:
 		Debug("Clicked Pause");
@@ -100,6 +105,7 @@ void singlePlayer() {
 		SDL_RenderClear(getRendererColor(BGCOLOR));
 		drawMap(map);
 		drawBag(bag, NULL);
+		drawHold(map);
 		SDL_RenderPresent(getRenderer());
 
 		current = SDL_GetTicks();
@@ -114,6 +120,8 @@ void singlePlayer() {
 		end = SDL_GetTicks();
 		if (end - start < 16) {
 			SDL_Delay(16 - (end - start));
+		} else {
+			Warning("Busy");
 		}
 	}
 

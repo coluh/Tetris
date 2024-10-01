@@ -12,12 +12,15 @@ Map *newMap(SDL_Rect *rect);
 void freeMap(Map *m);
 
 bool hasFallingBlock(Map *map);
+bool hasHold(Map *map);
 // returm 1 on fail
 int fall(Map *map);
 // move in specific way
 int move(Map *map, int dx, int dy);
 // rotate clockwise for times
 int rotate(Map *map, int times);
+// hold
+void hold(Map *map);
 // lock map->falling to map->block
 void lock(Map *map);
 // return lines cleared
@@ -27,5 +30,6 @@ int putBlock(Map *map, BlockType b);
 
 void drawMap(Map *m);
 void drawBag(BlockBag *g, SDL_Rect *rect);
+void drawHold(Map *m);
 
 #endif // __MAP_H__

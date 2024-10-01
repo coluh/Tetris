@@ -16,6 +16,9 @@ struct FallingBlock {
 struct Map {
 	BlockType *block;
 	FallingBlock *falling;
+	BlockType hold;
+
+	// Layout
 	SDL_Rect rect;
 };
 
@@ -52,6 +55,7 @@ Map *newMap(SDL_Rect *rect) {
 			setBlockAt(m, i, j, BLOCK_NE);
 		}
 	}
+	m->hold = BLOCK_NE;
 
 	if (rect) {
 		m->rect = Rect(rect->x, rect->y, rect->w, rect->h);
@@ -59,7 +63,7 @@ Map *newMap(SDL_Rect *rect) {
 		int ww, wh;
 		SDL_GetWindowSize(getWindow(), &ww, &wh);
 		wh -= 2 * fieldMargin;
-		m->rect = Rect(ww / 3, 20, wh/2, wh);
+		m->rect = Rect(ww / 3, fieldMargin, wh/2, wh);
 	}
 	return m;
 }
@@ -87,6 +91,10 @@ static int stuck(const Map *map) {
 
 bool hasFallingBlock(Map *map) {
 	return map->falling != NULL;
+}
+
+bool hasHold(Map *map) {
+	return map->hold != BLOCK_NE;
 }
 
 int fall(Map *map) {
@@ -125,6 +133,23 @@ int rotate(Map *map, int times) {
 	return 0;
 }
 
+void hold(Map *map) {
+	if (map->hold == BLOCK_NE) {
+		map->hold = map->falling->type;
+		free(map->falling);
+		map->falling = NULL;
+	} else {
+		BlockType h = map->hold;
+		map->hold = map->falling->type;
+
+		map->falling->x = blockStartX;
+		map->falling->y = blockStartY;
+		map->falling->type = h;
+		map->falling->rotate = ROTATE_0;
+		// TODO: maybe should check
+	}
+}
+
 void lock(Map *map) {
 	Assert(map->falling != NULL, "lock when no falling block");
 	const int (*shape)[2] = getBlockShape(map->falling->type, map->falling->rotate);
@@ -140,11 +165,10 @@ void lock(Map *map) {
 
 int checkLine(Map *map) {
 	int lines = 0;
-	Debug("checkLine start");
 	for (int y = 0; y < fieldHeight; y++) {
 		bool full = true;
-		if (y < 5)
-			Debug("\tLine %2d: %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d", y, blockAt(map, 0, y), blockAt(map, 1, y), blockAt(map, 2, y), blockAt(map, 3, y), blockAt(map, 4, y), blockAt(map, 5, y), blockAt(map, 6, y), blockAt(map, 7, y), blockAt(map, 8, y), blockAt(map, 9, y));
+		/*if (y < 5)*/
+			/*Debug("\tLine %2d: %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d", y, blockAt(map, 0, y), blockAt(map, 1, y), blockAt(map, 2, y), blockAt(map, 3, y), blockAt(map, 4, y), blockAt(map, 5, y), blockAt(map, 6, y), blockAt(map, 7, y), blockAt(map, 8, y), blockAt(map, 9, y));*/
 		for (int x = 0; x < fieldWidth; x++) {
 			if (blockAt(map, x, y) == BLOCK_NE) {
 				full = false;
@@ -231,6 +255,7 @@ void drawMap(Map *m) {
 	}
 }
 
+// use rect or use map to determine position, which is better?
 void drawBag(BlockBag *g, SDL_Rect *rect) {
 	int tempalloc = 0;
 	if (rect == NULL) {
@@ -270,4 +295,23 @@ void drawBag(BlockBag *g, SDL_Rect *rect) {
 		free(rect);
 }
 
+void drawHold(Map *map) {
+	SDL_Rect rect;
+	int a = map->rect.h / 20;
+	rect.x = map->rect.x - fieldMargin - 5 * a;
+	rect.y = fieldMargin;
+	rect.w = 5 * a;
+	rect.h = 4 * a;
+	SDL_Renderer *r = getRendererColor(Color(0, 0, 0));
+	SDL_RenderFillRect(r, &rect);
 
+	const int (*shape)[2] = getBlockShape(map->hold, ROTATE_0);
+	for (int i = 0; i < 4; i++) {
+		int x = shape[i][0] + 1;
+		int y = shape[i][1];
+		y = 2 - y;
+		x *= a;
+		y *= a;
+		drawBlock(map->hold, &(SDL_Rect){x+rect.x+a/2, y+rect.y+a/2, a, a});
+	}
+}
