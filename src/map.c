@@ -133,6 +133,7 @@ int rotate(Map *map, int times) {
 	return 0;
 }
 
+// TODO: MISS A RULE
 void hold(Map *map) {
 	if (map->hold == BLOCK_NE) {
 		map->hold = map->falling->type;
