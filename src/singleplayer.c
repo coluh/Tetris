@@ -104,7 +104,7 @@ void singlePlayer() {
 
 		SDL_RenderClear(getRendererColor(BGCOLOR));
 		drawMap(map);
-		drawBag(bag, NULL);
+		drawBag(bag, map);
 		drawHold(map);
 		SDL_RenderPresent(getRenderer());
 

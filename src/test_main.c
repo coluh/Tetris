@@ -28,4 +28,6 @@ void test_map() {
 	insertHashMap(map, "dog", (int []){4});
 	insertHashMap(map, "coffee", (int []){5});
 	Debug("cat: %d\tdog: %d\tcoffee: %d", *(int*)findHashMap(map, "cat"), *(int*)findHashMap(map, "dog"), *(int*)findHashMap(map, "coffee"));
+	int *p = NULL;
+	*p = 1;
 }

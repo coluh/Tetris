@@ -29,7 +29,7 @@ int checkLine(Map *map);
 int putBlock(Map *map, BlockType b);
 
 void drawMap(Map *m);
-void drawBag(BlockBag *g, SDL_Rect *rect);
+void drawBag(BlockBag *g, Map *m);
 void drawHold(Map *m);
 
 #endif // __MAP_H__

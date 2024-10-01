@@ -255,25 +255,17 @@ void drawMap(Map *m) {
 	}
 }
 
-// use rect or use map to determine position, which is better?
-void drawBag(BlockBag *g, SDL_Rect *rect) {
-	int tempalloc = 0;
-	if (rect == NULL) {
-		rect = malloc(sizeof(struct SDL_Rect));
-		tempalloc = 1;
-		int ww, wh;
-		SDL_GetWindowSize(getWindow(), &ww, &wh);
-		wh -= 2 * fieldMargin;
-		rect->x = ww / 3 + wh / 2 + fieldMargin;
-		rect->y = fieldMargin;
-		rect->w = (float)wh / 20 * 5;
-		rect->w /= 1.5;
-		rect->h = rect->w * 3.5;
-	}
+void drawBag(BlockBag *g, Map *map) {
+	SDL_Rect rect;
+	rect.x = map->rect.x + map->rect.w + fieldMargin;
+	rect.y = fieldMargin;
+	rect.w = 5 * map->rect.h / 20;
+	rect.w /= 1.5;
+	rect.h = rect.w * 3.5;
 	SDL_Renderer *r = getRendererColor(Color(0, 0, 0));
-	SDL_RenderFillRect(r, rect);
+	SDL_RenderFillRect(r, &rect);
 
-	int a = (float)rect->w / 5;
+	int a = (float)rect.w / 5;
 	const BlockType *list = listBag(g);
 	for (int t = 0; t < BLOCK_NUM - 1; t++) {
 		BlockType b = list[t];
@@ -287,12 +279,9 @@ void drawBag(BlockBag *g, SDL_Rect *rect) {
 			y += t * 3 * a - a;
 			if (b != BLOCK_I && b != BLOCK_O)
 				x += a/2;
-			drawBlock(b, &(SDL_Rect){x + rect->x + a/2, y + rect->y + a/2, a, a});
+			drawBlock(b, &(SDL_Rect){x + rect.x + a/2, y + rect.y + a/2, a, a});
 		}
 	}
-
-	if (tempalloc)
-		free(rect);
 }
 
 void drawHold(Map *map) {
