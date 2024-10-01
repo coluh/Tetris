@@ -164,6 +164,8 @@ BlockType popBlock(BlockBag *bag) {
 }
 
 void drawBlock(BlockType b, const SDL_Rect *rect) {
+	if (b == BLOCK_NE)
+		return;
 	const int *c = blockColor[b];
 	SDL_Renderer *r = getRenderer();
 	SDL_SetRenderDrawColor(r, c[0], c[1], c[2], 255);

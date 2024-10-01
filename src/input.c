@@ -26,6 +26,8 @@ void initInputConfig() {
 }
 
 int getKeyDownOption(const SDL_Event *event) {
+	if (event->key.keysym.sym == SDLK_d)
+		Debug("D");
 	OptionInt result = getIntMap(keymap, event->key.keysym.sym);
 	if (result.exist) {
 		return result.data;

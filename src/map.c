@@ -133,7 +133,35 @@ void lock(Map *map) {
 		int y = map->falling->y + shape[i][1];
 		setBlockAt(map, x, y, map->falling->type);
 	}
+	free(map->falling);
 	map->falling = NULL;
+	checkLine(map);
+}
+
+int checkLine(Map *map) {
+	int lines = 0;
+	Debug("checkLine start");
+	for (int y = 0; y < fieldHeight; y++) {
+		bool full = true;
+		if (y < 5)
+			Debug("\tLine %2d: %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d", y, blockAt(map, 0, y), blockAt(map, 1, y), blockAt(map, 2, y), blockAt(map, 3, y), blockAt(map, 4, y), blockAt(map, 5, y), blockAt(map, 6, y), blockAt(map, 7, y), blockAt(map, 8, y), blockAt(map, 9, y));
+		for (int x = 0; x < fieldWidth; x++) {
+			if (blockAt(map, x, y) == BLOCK_NE) {
+				full = false;
+				break;
+			}
+		}
+		if (full) {
+			lines++;
+			for (int j = y; j < fieldHeight-1; j++) {
+				for(int i = 0; i < fieldWidth; i++) {
+					setBlockAt(map, i, j, blockAt(map, i, j+1));
+				}
+			}
+			y--;
+		}
+	}
+	return lines;
 }
 
 int putBlock(Map *map, BlockType b) {
@@ -241,3 +269,5 @@ void drawBag(BlockBag *g, SDL_Rect *rect) {
 	if (tempalloc)
 		free(rect);
 }
+
+

@@ -32,12 +32,12 @@ static int forward(Map *map, BlockBag *bag) {
 	return 0;
 }
 
-static void handleInput(Map *map, BlockBag *bag, int opt) {
+static int handleInput(Map *map, BlockBag *bag, int opt) {
 	if (!hasFallingBlock(map)) {
 		if (opt == OPT_PAUSE) {
 			Debug("Pause");
 		}
-		return;
+		return 0;
 	}
 	switch (opt) {
 	case OPT_LEFT:
@@ -53,8 +53,7 @@ static void handleInput(Map *map, BlockBag *bag, int opt) {
 		while (move(map, 0, -1) == 0)
 			;
 		lock(map);
-		forward(map, bag);
-		// TODO: gameover
+		return forward(map, bag);
 		break;
 	case OPT_ROTATER:
 		rotate(map, 3);
@@ -71,6 +70,7 @@ static void handleInput(Map *map, BlockBag *bag, int opt) {
 	default:
 		break;
 	}
+	return 0;
 }
 
 void singlePlayer() {
@@ -90,7 +90,10 @@ void singlePlayer() {
 			if (event.type == SDL_QUIT)
 				running = false;
 			if (event.type == SDL_KEYDOWN) {
-				handleInput(map, bag, getKeyDownOption(&event));
+				if (handleInput(map, bag, getKeyDownOption(&event)) != 0) {
+					Debug("Game Over");
+					running = false;
+				}
 			}
 		}
 
@@ -100,9 +103,10 @@ void singlePlayer() {
 		SDL_RenderPresent(getRenderer());
 
 		current = SDL_GetTicks();
-		if (current - last >= 500) {
+		if (current - last >= 500 && running) {
 			if (forward(map, bag) != 0) {
 				Debug("Game Over");
+				running = false;
 			}
 			last = current;
 		}

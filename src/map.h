@@ -20,6 +20,8 @@ int move(Map *map, int dx, int dy);
 int rotate(Map *map, int times);
 // lock map->falling to map->block
 void lock(Map *map);
+// return lines cleared
+int checkLine(Map *map);
 // place a new block on the map
 int putBlock(Map *map, BlockType b);
 
