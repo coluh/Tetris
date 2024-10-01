@@ -1,5 +1,5 @@
 
-CFLAGS = -lSDL2 -lSDL2_ttf
+CFLAGS = -lSDL2 -lSDL2_ttf -lm
 # CFLAGS += -Werror -Wall
 CFLAGS += -g -ggdb
 

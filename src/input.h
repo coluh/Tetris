@@ -14,7 +14,7 @@
 #define OPT_PAUSE	8
 #define OPT_NUM		9
 
-void initInput();
+void initInputConfig();
 
 int getKeyDownOption(const SDL_Event *event);
 

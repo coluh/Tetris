@@ -8,7 +8,7 @@ typedef struct Map Map;
 
 void initMapConfig();
 
-Map *newMap();
+Map *newMap(SDL_Rect *rect);
 void freeMap(Map *m);
 
 bool hasFallingBlock(Map *map);
@@ -24,5 +24,6 @@ void lock(Map *map);
 int putBlock(Map *map, BlockType b);
 
 void drawMap(Map *m);
+void drawBag(BlockBag *g, SDL_Rect *rect);
 
 #endif // __MAP_H__

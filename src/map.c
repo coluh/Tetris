@@ -21,17 +21,20 @@ struct Map {
 
 // config variables
 // game rules related to map
-static int fieldWidth = 10;
-static int fieldHeight = 40;
-static int fieldHeightVisible = 20;
-static int blockStartX = 5;
-static int blockStartY = 21;
+static int fieldWidth;
+static int fieldHeight;
+static int fieldHeightVisible;
+static int blockStartX;
+static int blockStartY;
+static int fieldMargin;
 
 void initMapConfig() {
 	fieldWidth = getConfigModule("rules")->getInt("FieldWidth");
 	fieldHeight = getConfigModule("rules")->getInt("FieldHeight");
+	fieldHeightVisible = getConfigModule("rules")->getInt("FieldHeightVisible");
 	blockStartX = getConfigModule("rules")->getInt("BlockStartX");
 	blockStartY = getConfigModule("rules")->getInt("BlockStartY");
+	fieldMargin = getConfigModule("rules")->getInt("FieldMargin");
 }
 
 static BlockType blockAt(const Map *map, int x, int y) {
@@ -41,7 +44,7 @@ static void setBlockAt(Map *map, int x, int y, BlockType bt) {
 	map->block[x + y * fieldWidth] = bt;
 }
 
-Map *newMap() {
+Map *newMap(SDL_Rect *rect) {
 	Map *m = calloc(1, sizeof(struct Map));
 	m->block = calloc(fieldWidth * fieldHeight, sizeof(BlockType));
 	for (int i = 0; i < fieldWidth; i++) {
@@ -49,10 +52,15 @@ Map *newMap() {
 			setBlockAt(m, i, j, BLOCK_NE);
 		}
 	}
-	int ww, wh;
-	SDL_GetWindowSize(getWindow(), &ww, &wh);
-	wh -= 40;
-	m->rect = Rect(ww / 3, 20, wh/2, wh);
+
+	if (rect) {
+		m->rect = Rect(rect->x, rect->y, rect->w, rect->h);
+	} else {
+		int ww, wh;
+		SDL_GetWindowSize(getWindow(), &ww, &wh);
+		wh -= 2 * fieldMargin;
+		m->rect = Rect(ww / 3, 20, wh/2, wh);
+	}
 	return m;
 }
 
@@ -193,4 +201,43 @@ void drawMap(Map *m) {
 		SDL_Rect rect = {x + m->rect.x, y + m->rect.y, a, a};
 		drawBlock(m->falling->type, &rect);
 	}
+}
+
+void drawBag(BlockBag *g, SDL_Rect *rect) {
+	int tempalloc = 0;
+	if (rect == NULL) {
+		rect = malloc(sizeof(struct SDL_Rect));
+		tempalloc = 1;
+		int ww, wh;
+		SDL_GetWindowSize(getWindow(), &ww, &wh);
+		wh -= 2 * fieldMargin;
+		rect->x = ww / 3 + wh / 2 + fieldMargin;
+		rect->y = fieldMargin;
+		rect->w = (float)wh / 20 * 5;
+		rect->w /= 1.5;
+		rect->h = rect->w * 3.5;
+	}
+	SDL_Renderer *r = getRendererColor(Color(0, 0, 0));
+	SDL_RenderFillRect(r, rect);
+
+	int a = (float)rect->w / 5;
+	const BlockType *list = listBag(g);
+	for (int t = 0; t < BLOCK_NUM - 1; t++) {
+		BlockType b = list[t];
+		const int (*shape)[2] = getBlockShape(b, ROTATE_0);
+		for (int i = 0; i < 4; i++) {
+			int x = shape[i][0] + 1;
+			int y = shape[i][1];
+			y = 2 - y;
+			x *= a;
+			y *= a;
+			y += t * 3 * a - a;
+			if (b != BLOCK_I && b != BLOCK_O)
+				x += a/2;
+			drawBlock(b, &(SDL_Rect){x + rect->x + a/2, y + rect->y + a/2, a, a});
+		}
+	}
+
+	if (tempalloc)
+		free(rect);
 }

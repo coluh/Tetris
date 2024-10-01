@@ -9,7 +9,7 @@
 
 static IntMap *keymap;
 
-void initInput() {
+void initInputConfig() {
 	if (!keymap) {
 		keymap = newIntMap();
 	}

@@ -3,6 +3,7 @@
 #include "common/utils.h"
 #include "render.h"
 
+#include <math.h>
 #include <stdlib.h>
 
 // these are of rotate_0
@@ -130,9 +131,18 @@ BlockBag *newBlockBag() {
 	return bag;
 }
 
-const BlockType *listBag() {
+const BlockType *listBag(BlockBag *bag) {
 	static BlockType blocks[BLOCK_NUM * 2];
-	return blocks + 3;
+	for (int i = 0; i < BLOCK_NUM; i++)
+		blocks[i] = bag->current[i];
+	for (int i = 0; i < BLOCK_NUM; i++)
+		blocks[i + BLOCK_NUM] = bag->later[i];
+	for (int i = 0; i < BLOCK_NUM; i++)
+		if (bag->current[i] != BLOCK_NE)
+			return &blocks[i];
+	for (int i = 0; i < BLOCK_NUM; i++)
+		if (bag->later[i] != BLOCK_NE)
+			return &blocks[i + BLOCK_NUM];
 }
 
 BlockType popBlock(BlockBag *bag) {
@@ -183,9 +193,13 @@ void drawBlockShadow(BlockType b, const SDL_Rect *rect) {
 	const int *c = blockColor[b];
 	SDL_Renderer *r = getRenderer();
 
-	int range = rect->w / 3;
+	int range = rect->w / 2;
 	for (int a = 0; a < range; a++) {
-		SDL_SetRenderDrawColor(r, c[0], c[1], c[2], 255*(1-(float)a/range));
+		float k = (float)a / range;
+		k = sqrt(k);
+		SDL_SetRenderDrawColor(r, c[0], c[1], c[2], 255*(1-k));
+		/*SDL_SetRenderDrawColor(r, c[0]+(255-c[0])*k, c[1]+(255-c[1])*k, c[2]+(255-c[2])*k, 200+55*(1-k));*/
+		/*SDL_SetRenderDrawColor(r, 255, 255, 255, 255*(1-k));*/
 		SDL_RenderDrawLines(r, (SDL_Point []){
 			{rect->x + a, rect->y + a},
 			{rect->x + rect->w - a, rect->y + a},
@@ -195,3 +209,5 @@ void drawBlockShadow(BlockType b, const SDL_Rect *rect) {
 		}, 5);
 	}
 }
+
+

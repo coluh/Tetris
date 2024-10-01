@@ -34,6 +34,7 @@ int toInt(const char *string) {
 			Error("atoi fail");
 		d *= 10;
 		d += i;
+		p++;
 	}
 	d *= k;
 	return d;

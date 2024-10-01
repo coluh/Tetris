@@ -1,5 +1,6 @@
 #include "render.h"
 #include "config/config.h"
+#include "map.h"
 #include "menu.h"
 #include "block.h"
 #include "input.h"
@@ -17,7 +18,8 @@ int main() {
 	initRender();
 	initMenuConfig();
 	initBlockConfig();
-	initInput();
+	initMapConfig();
+	initInputConfig();
 
 	Menu *start = new_Menu(1400, 1000);
 	addMenuEntry(start, "Single Player", singlePlayer);

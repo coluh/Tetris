@@ -125,5 +125,6 @@ const char *tableFind(Table *table, const char *key) {
 		if (strcmp(p->key, key) == 0)
 			return p->value;
 	}
+	Error("KEY Not Found");
 	return NULL;
 }

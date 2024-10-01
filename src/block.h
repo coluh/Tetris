@@ -33,7 +33,7 @@ const int (*getBlockShape(int type, int rotate))[2];
 
 // in fact two bags to show preview
 BlockBag *newBlockBag();
-const BlockType *listBag();
+const BlockType *listBag(BlockBag *bag);
 BlockType popBlock(BlockBag *bag);
 
 // x, y are coordinate to window

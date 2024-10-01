@@ -99,7 +99,7 @@ void setString(const char *key, const char *value) {
 	Error("Not_Implement");
 }
 int getInt(const char *key) {
-	return atoi(tableFind(this->data, key));
+	return toInt(tableFind(this->data, key));
 }
 void setInt(const char *key, int value) {
 	Error("Not_Implement");
