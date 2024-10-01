@@ -11,15 +11,15 @@ static struct {
 	TTF_Font *font;
 } render;
 
-const SDL_Color BGCOLOR = {0, 0, 31, 255};
-int windowWidth = 1400;
-int windowHeight = 800;
-int fontsize = 48;
+SDL_Color backgroundColor;
+int windowWidth;
+int windowHeight;
+int fontsize;
 
 
 SDL_Window *getWindow() { return render.window; }
 SDL_Renderer *getRenderer() {
-	SDL_SetRenderDrawColor(render.renderer, ColorUnpack(BGCOLOR));
+	SDL_SetRenderDrawColor(render.renderer, ColorUnpack(backgroundColor));
 	return render.renderer;
 }
 SDL_Renderer *getRendererColor(SDL_Color color) {
@@ -37,6 +37,8 @@ SDL_Texture *createTextTexture(const char *string, SDL_Color color) {
 }
 
 void initRender() {
+	const int *p = getConfigModule("layout")->getIntArray("BackgroundColor");
+	backgroundColor = Color(p[0], p[1], p[2]);
 	windowWidth = getConfigModule("layout")->getInt("WindowWidth");
 	windowHeight = getConfigModule("layout")->getInt("WindowHeight");
 	fontsize = getConfigModule("layout")->getInt("FontSize");

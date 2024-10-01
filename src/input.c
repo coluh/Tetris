@@ -1,35 +1,37 @@
 #include "input.h"
 #include "config/config.h"
 #include "common/utils.h"
+#include "common/intmap.h"
 
 #include <stdlib.h>
 
 #include <SDL2/SDL.h>
 
-static int *keys;
+static IntMap *keymap;
 
 void initInput() {
-	if (!keys) {
-		keys = calloc(OPT_NUM, sizeof(int));
+	if (!keymap) {
+		keymap = newIntMap();
 	}
-	keys[OPT_LEFT] = getConfigModule("keymap")->getInt("Left");
-	keys[OPT_RIGHT] = getConfigModule("keymap")->getInt("Right");
-	keys[OPT_SOFT] = getConfigModule("keymap")->getInt("Down");
-	keys[OPT_DROP] = getConfigModule("keymap")->getInt("Drop");
-	keys[OPT_ROTATER] = getConfigModule("keymap")->getInt("RotateR");
-	keys[OPT_ROTATEC] = getConfigModule("keymap")->getInt("RotateC");
-	keys[OPT_HOLD] = getConfigModule("keymap")->getInt("Hold");
-	keys[OPT_PAUSE] = getConfigModule("keymap")->getInt("Pause");
+	// corresponde to OPT_* definitions
+	const char *options[] = {
+		"empty", "Left", "Right", "Down", "Drop", "RotateR", "RotateC", "Hold", "Pause",
+	};
+	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
+		const int *p = getConfigModule("keymap")->getIntArray(options[i]);
+		for (int j = 0; p[j] != 0; j++) {
+			insertIntMap(keymap, p[j], i);
+		}
+	}
 }
 
 int getKeyDownOption(const SDL_Event *event) {
-	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
-		if (keys[i] == event->key.keysym.sym) {
-			return i;
-		}
+	OptionInt result = getIntMap(keymap, event->key.keysym.sym);
+	if (result.exist) {
+		return result.data;
 	}
 	Debug("Skip unuseful keydown: %c", event->key.keysym.sym);
-	return NULL;
+	return OPT_EMPTY;
 }
 
 

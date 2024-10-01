@@ -7,8 +7,12 @@
 #include "singleplayer.h"
 #include "settings.h"
 
+#include <signal.h>
+#include "common/errhandle.h"
+
 int main() {
 
+	signal(SIGSEGV, segv_handler);
 	loadConfig("./config/");
 	initRender();
 	initMenuConfig();

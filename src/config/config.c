@@ -104,6 +104,29 @@ int getInt(const char *key) {
 void setInt(const char *key, int value) {
 	Error("Not_Implement");
 }
+const int *getIntArray(const char *key) {
+	static int t[MAX_ARRAY_LEN + 1];
+	const char *v = tableFind(this->data, key);
+	char *s = malloc(strlen(v) + 1);
+	strcpy(s, v);
+	char *word = &s[0];
+	int index = 0;
+	for (int i = 0; s[i] != '\0'; i++) {
+		if (s[i] == ',') {
+			s[i] = '\0';
+			t[index++] = atoi(word);
+			word = &s[i+1];
+		}
+	}
+	if(*word != '\0')
+		t[index++] = atoi(word);
+	t[index] = 0;
+	free(s);
+	return t;
+}
+void setIntArray(const char *key, int *value) {
+	Error("Not_Implement");
+}
 void writeToFile() {
 	Error("Not_Implement");
 }
@@ -122,9 +145,11 @@ static void addModule(const char *filename, Table *data) {
 
 	this->data = data;
 	this->getString = getString;
-	this->setString = setString;
 	this->getInt = getInt;
+	this->getIntArray = getIntArray;
+	this->setString = setString;
 	this->setInt = setInt;
+	this->setIntArray = setIntArray;
 	this->writeToFile = writeToFile;
 }
 

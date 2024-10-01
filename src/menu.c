@@ -16,19 +16,24 @@
 #include <string.h>
 
 // config variables
-static SDL_Color FONTCOLOR_INACTIVE = {255, 255, 255, 255};
-static SDL_Color FONTCOLOR_ACTIVE = {0, 255, 0, 255};
-static SDL_Color ENTRYCOLOR_INACTIVE = {0, 0, 0, 0};
-static SDL_Color ENTRYCOLOR_ACTIVE = {0, 0, 0, 127};
-static SDL_Color MENUCOLOR = {40, 120, 255, 255};
+static SDL_Color fontColorInactive;
+static SDL_Color fontColorActive;
+static SDL_Color entryColorInactive;
+static SDL_Color entryColorActive;
+static SDL_Color menuColor;
 
-static int paddingH = 20;
-static int paddingV = 20;
-static int marginH = 5;
-static int marginV = 5;
+static int paddingH;
+static int paddingV;
+static int marginH;
+static int marginV;
 extern int fontsize;
 
 void initMenuConfig() {
+	fontColorInactive = ColorArray(getConfigModule("layout")->getIntArray("FontColorInactive"));
+	fontColorActive = ColorArray(getConfigModule("layout")->getIntArray("FontColorActive"));
+	entryColorInactive = ColorArrayA(getConfigModule("layout")->getIntArray("EntryColorInactive"));
+	entryColorActive = ColorArrayA(getConfigModule("layout")->getIntArray("EntryColorActive"));
+	menuColor = ColorArrayA(getConfigModule("layout")->getIntArray("MenuColor"));
 	paddingH = getConfigModule("layout")->getInt("PaddingH");
 	paddingV = getConfigModule("layout")->getInt("PaddingV");
 	marginH = getConfigModule("layout")->getInt("MarginH");
@@ -74,8 +79,8 @@ void addMenuEntry(Menu *m, const char *string, void (*func)(void)) {
 	MenuEntry *this = &m->list[m->list_len];
 	this->string = string;
 	this->func = func;
-	this->text_inactive = createTextTexture(this->string, FONTCOLOR_INACTIVE);
-	this->text_active = createTextTexture(this->string, FONTCOLOR_ACTIVE);
+	this->text_inactive = createTextTexture(this->string, fontColorInactive);
+	this->text_active = createTextTexture(this->string, fontColorActive);
 	SDL_QueryTexture(this->text_active, NULL, NULL, &this->text_w, &this->text_h);
 	Debug("text_w: %d, text_h: %d", this->text_w, this->text_h);
 	this->active = false;
@@ -133,14 +138,14 @@ static void updateMenuStatus(Menu *m, int mousex, int mousey, int type) {
 static void drawMenu(Menu *m) {
 	SDL_Renderer *r = getRenderer();
 	SDL_Rect rect = {m->x, m->y, m->w, m->h};
-	SDL_SetRenderDrawColor(r, ColorUnpack(MENUCOLOR));
+	SDL_SetRenderDrawColor(r, ColorUnpack(menuColor));
 	SDL_RenderFillRect(r, &rect);
 	for (int i = 0; i < m->list_len; i++) {
 		MenuEntry *this = &m->list[i];
 		if (this->active)
-			SDL_SetRenderDrawColor(r, ColorUnpack(ENTRYCOLOR_ACTIVE));
+			SDL_SetRenderDrawColor(r, ColorUnpack(entryColorActive));
 		else
-			SDL_SetRenderDrawColor(r, ColorUnpack(ENTRYCOLOR_INACTIVE));
+			SDL_SetRenderDrawColor(r, ColorUnpack(entryColorInactive));
 		rect = (SDL_Rect) {this->x, this->y, this->w, this->h};
 		SDL_RenderFillRect(r, &rect);
 		SDL_Rect dst = {this->x + paddingH, this->y + paddingV, this->text_w, this->text_h};
