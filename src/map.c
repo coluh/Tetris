@@ -1,10 +1,12 @@
 #include "map.h"
+#include "block.h"
 #include "common/utils.h"
 #include "config/config.h"
 #include "render.h"
 
 #include <SDL2/SDL.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 struct FallingBlock {
@@ -186,6 +188,14 @@ int checkLine(Map *map) {
 		}
 	}
 	return lines;
+}
+
+int perfectClear(Map *map) {
+	for (int y = 0; y < fieldHeight; y++)
+		for (int x = 0; x < fieldWidth; x++)
+			if (blockAt(map, x, y) != BLOCK_NE)
+				return false;
+	return true;
 }
 
 int putBlock(Map *map, BlockType b) {

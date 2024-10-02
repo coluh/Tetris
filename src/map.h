@@ -25,6 +25,8 @@ void hold(Map *map);
 void lock(Map *map);
 // return lines cleared
 int checkLine(Map *map);
+// no blocks empty
+int perfectClear(Map *map);
 // place a new block on the map
 int putBlock(Map *map, BlockType b);
 

@@ -5,7 +5,7 @@
 
 - [x] Ghost Block
 - [ ] Hold
-- [ ] Score Module
+- [x] Score Module
 - [ ] SRS
 - [ ] T-Spins
 - [ ] Lock Down Delay

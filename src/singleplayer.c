@@ -13,17 +13,40 @@
 static SDL_Color BGCOLOR = {0, 127, 233, 255};
 
 static struct {
+	int comboNow;
 	int lines;
 	int level;
-	int score;
+	int points;
 } s;
+
+static void checkLineWrapper(Map *map) {
+	int line = checkLine(map);
+	if (line > 0)
+		s.comboNow++;
+	else
+		s.comboNow = 0;
+	s.lines += line;
+	int k[5] = {0, 100, 300, 500, 800};
+	s.points += k[line] * s.level;
+	if (line)
+		Debug("%d line! +%d", line, k[line] * s.level);
+	if (s.comboNow > 1) {
+		s.points += 50 * s.comboNow * s.level;
+		Debug("\t %d Combo! +%d", s.comboNow, 50 * s.comboNow * s.level);
+	}
+	if (perfectClear(map)) {
+		int kp[5] = {0, 800, 1200, 1800, 2000};
+		s.points += kp[line] * s.level;
+		Debug("\t Perfect Clear! +%d", kp[line] * s.level);
+	}
+}
 
 // TODO: these are to ugly
 static int forward(Map *map, BlockBag *bag) {
 	if (hasFallingBlock(map)) {
 		if (fall(map) != 0) {
 			lock(map);
-			s.lines += checkLine(map);
+			checkLineWrapper(map);
 			return forward(map, bag);
 		}
 	} else {
@@ -33,7 +56,7 @@ static int forward(Map *map, BlockBag *bag) {
 			// Tetris Guideline asked for this.
 			if (fall(map) != 0) {
 				lock(map);
-				s.lines += checkLine(map);
+				checkLineWrapper(map);
 				return forward(map, bag);
 			}
 		}
@@ -62,7 +85,7 @@ static int handleInput(Map *map, BlockBag *bag, int opt) {
 		while (move(map, 0, -1) == 0)
 			;
 		lock(map);
-		s.lines += checkLine(map);
+		checkLineWrapper(map);
 		Debug("Lines: %d", s.lines);
 		return forward(map, bag);
 		break;
@@ -97,6 +120,7 @@ void singlePlayer() {
 	uint32_t last = SDL_GetTicks();
 	uint32_t start, current, end;
 
+	s.level = 3;
 	Map *map = newMap(NULL);
 	BlockBag *bag = newBlockBag();
 
@@ -137,5 +161,7 @@ void singlePlayer() {
 	}
 
 	// game over
-	;
+	Debug("Lines: %d\tScore: %d", s.lines, s.points);
+	s.lines = 0;
+	s.points = 0;
 }
