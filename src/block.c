@@ -38,7 +38,7 @@ struct BlockBag {
 
 // for analyser program
 static int blockColor[BLOCK_NUM][3] = {
-	{0, 127, 255},
+	{0, 255, 255},
 	{255, 255, 0},
 	{127, 0, 255},
 	{0, 255, 0},
