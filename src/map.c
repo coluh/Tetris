@@ -1,11 +1,14 @@
 #include "map.h"
 #include "block.h"
 #include "common/utils.h"
+#include "common/arraylist.h"
 #include "config/config.h"
 #include "render.h"
 
 #include <SDL2/SDL.h>
 
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -22,6 +25,15 @@ struct Map {
 
 	// Layout
 	SDL_Rect rect;
+	List *dropEffects;
+};
+
+struct DropEffect {
+	BlockType b;
+	int sx;
+	int sy;
+	int hw;
+	int range;
 };
 
 // config variables
@@ -58,6 +70,7 @@ Map *newMap(SDL_Rect *rect) {
 		}
 	}
 	m->hold = BLOCK_NE;
+	m->dropEffects = newList(sizeof(struct DropEffect));
 
 	if (rect) {
 		m->rect = Rect(rect->x, rect->y, rect->w, rect->h);
@@ -99,16 +112,6 @@ bool hasHold(Map *map) {
 	return map->hold != BLOCK_NE;
 }
 
-int fall(Map *map) {
-	Assert(map->falling != NULL, "fall() when no falling block");
-	map->falling->y--;
-	if (stuck(map)) {
-		map->falling->y++;
-		return 1;
-	}
-	return 0;
-}
-
 int move(Map *map, int dx, int dy) {
 	Assert(map->falling != NULL, "move() when no falling block");
 	map->falling->x += dx;
@@ -119,6 +122,30 @@ int move(Map *map, int dx, int dy) {
 		return 1;
 	}
 	return 0;
+}
+
+void drop(Map *map) {
+	while (move(map, 0, -1) == 0)
+		;
+
+	int a = map->rect.h / fieldHeightVisible;
+	int hw = getBlockWidth(map->falling->type, map->falling->rotate) * a / 2;
+	int sx = map->falling->x;
+	sx *= a;
+	sx += map->rect.x;
+	sx += hw;
+	int sy = map->falling->y;
+	sy = 19 - sy;
+	sy *= a;
+	sy += map->rect.y;
+	listAdd(map->dropEffects, &(struct DropEffect){
+			.b = map->falling->type,
+			.sx = sx,
+			.sy = sy,
+			.hw = hw,
+			.range = a * 10,
+	});
+	lock(map);
 }
 
 int rotate(Map *map, int times) {
@@ -215,6 +242,8 @@ int putBlock(Map *map, BlockType b) {
 	return 0;
 }
 
+static void drawDropEffect(Map *m, struct DropEffect *eff);
+
 void drawMap(Map *m) {
 	SDL_Renderer *r = getRenderer();
 	SDL_RenderFillRect(r, &m->rect);
@@ -263,13 +292,18 @@ void drawMap(Map *m) {
 		SDL_Rect rect = {x + m->rect.x, y + m->rect.y, a, a};
 		drawBlock(m->falling->type, &rect);
 	}
+	// draw drop dropEffects
+	for (int i = 0; i < listLength(m->dropEffects); i++) {
+		struct DropEffect *eff = (struct DropEffect *)listGet(m->dropEffects, i);
+		drawDropEffect(m, eff);
+	}
 }
 
 void drawBag(BlockBag *g, Map *map) {
 	SDL_Rect rect;
 	rect.x = map->rect.x + map->rect.w + fieldMargin;
 	rect.y = fieldMargin;
-	rect.w = 5 * map->rect.h / 20;
+	rect.w = 5 * map->rect.h / fieldHeightVisible;
 	rect.w /= 1.5;
 	rect.h = rect.w * 3.5;
 	SDL_Renderer *r = getRendererColor(Color(0, 0, 0));
@@ -296,7 +330,7 @@ void drawBag(BlockBag *g, Map *map) {
 
 void drawHold(Map *map) {
 	SDL_Rect rect;
-	int a = map->rect.h / 20;
+	int a = map->rect.h / fieldHeightVisible;
 	rect.x = map->rect.x - fieldMargin - 5 * a;
 	rect.y = fieldMargin;
 	rect.w = 5 * a;
@@ -312,5 +346,16 @@ void drawHold(Map *map) {
 		x *= a;
 		y *= a;
 		drawBlock(map->hold, &(SDL_Rect){x+rect.x+a/2, y+rect.y+a/2, a, a});
+	}
+}
+
+// sx sy is center of effect beginning
+static void drawDropEffect(Map *m, struct DropEffect *eff) {
+
+	const int *c = getBlockColor(eff->b);
+	SDL_Renderer *r = getRenderer();
+	for (int h = 0; h < eff->range; h++) {
+		SDL_SetRenderDrawColor(r, c[0], c[1], c[2], 255 - 255 * h / eff->range);
+		SDL_RenderDrawLine(r, eff->sx - eff->hw, eff->sy - h, eff->sx + eff->hw, eff->sy - h);
 	}
 }

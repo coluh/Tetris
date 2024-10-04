@@ -54,6 +54,19 @@ const int (*getBlockShape(int type, int rotate))[2] {
 	return blockShape[type][rotate];
 }
 
+int getBlockWidth(BlockType b, RotateState r) {
+	const int (*shape)[2] = getBlockShape(b, r);
+	int minx = shape[0][0];
+	int maxx = shape[0][0];
+	for (int i = 0; i < 4; i++) {
+		if (shape[i][0] < minx)
+			minx = shape[i][0];
+		if (shape[i][0] > maxx)
+			maxx = shape[i][0];
+	}
+	return maxx - minx + 1;
+}
+
 void initBlockConfig() {/*{{{*/
 	for (int t = 0; t < BLOCK_NUM; t++) {
 		const char *s = blocks_description[t];
@@ -211,5 +224,4 @@ void drawBlockShadow(BlockType b, const SDL_Rect *rect) {
 		}, 5);
 	}
 }
-
 
