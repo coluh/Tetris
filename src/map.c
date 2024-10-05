@@ -30,11 +30,14 @@ struct Map {
 
 struct DropEffect {
 	BlockType b;
-	int sx;
+	float sx;
 	int sy;
 	int hw;
 	int range;
+	int remaining;
 };
+
+#define REMAIN_TOTAL 60
 
 // config variables
 // game rules related to map
@@ -130,10 +133,10 @@ void drop(Map *map) {
 
 	int a = map->rect.h / fieldHeightVisible;
 	int hw = getBlockWidth(map->falling->type, map->falling->rotate) * a / 2;
-	int sx = map->falling->x;
+	float sx = getBlockCenterX(map->falling->type, map->falling->rotate);
+	sx += map->falling->x;
 	sx *= a;
 	sx += map->rect.x;
-	sx += hw;
 	int sy = map->falling->y;
 	sy = 19 - sy;
 	sy *= a;
@@ -144,6 +147,7 @@ void drop(Map *map) {
 			.sy = sy,
 			.hw = hw,
 			.range = a * 10,
+			.remaining = REMAIN_TOTAL,
 	});
 	lock(map);
 }
@@ -248,6 +252,16 @@ void drawMap(Map *m) {
 	SDL_Renderer *r = getRenderer();
 	SDL_RenderFillRect(r, &m->rect);
 	int a = m->rect.w / fieldWidth;
+	// draw drop dropEffects
+	for (int i = 0; i < listLength(m->dropEffects); i++) {
+		struct DropEffect *eff = (struct DropEffect *)listGet(m->dropEffects, i);
+		drawDropEffect(m, eff);
+		eff->remaining--;
+		if (eff->remaining <= 0) {
+			listDelete(m->dropEffects, i);
+		}
+	}
+	// draw blocks in map
 	for (int i = 0; i < fieldWidth; i++) {
 		for (int j = 0; j < fieldHeightVisible; j++) {
 			// top left
@@ -291,11 +305,6 @@ void drawMap(Map *m) {
 		y *= a;
 		SDL_Rect rect = {x + m->rect.x, y + m->rect.y, a, a};
 		drawBlock(m->falling->type, &rect);
-	}
-	// draw drop dropEffects
-	for (int i = 0; i < listLength(m->dropEffects); i++) {
-		struct DropEffect *eff = (struct DropEffect *)listGet(m->dropEffects, i);
-		drawDropEffect(m, eff);
 	}
 }
 
@@ -355,7 +364,12 @@ static void drawDropEffect(Map *m, struct DropEffect *eff) {
 	const int *c = getBlockColor(eff->b);
 	SDL_Renderer *r = getRenderer();
 	for (int h = 0; h < eff->range; h++) {
-		SDL_SetRenderDrawColor(r, c[0], c[1], c[2], 255 - 255 * h / eff->range);
+		float a = 255 - (float)255 * h / eff->range;
+		a *= (float)eff->remaining / REMAIN_TOTAL;
+		SDL_SetRenderDrawColor(r, c[0], c[1], c[2], (int)a);
 		SDL_RenderDrawLine(r, eff->sx - eff->hw, eff->sy - h, eff->sx + eff->hw, eff->sy - h);
+		a *= 0.5;
+		SDL_SetRenderDrawColor(r, c[0], c[1], c[2], (int)a);
+		SDL_RenderDrawLine(r, eff->sx - 5, eff->sy - h, eff->sx + 5, eff->sy - h);
 	}
 }

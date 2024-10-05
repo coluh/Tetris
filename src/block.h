@@ -31,6 +31,7 @@ void initBlockConfig();
 const int *getBlockColor(int btype);
 const int (*getBlockShape(int type, int rotate))[2];
 int getBlockWidth(BlockType b, RotateState r);
+float getBlockCenterX(BlockType b, RotateState r);
 
 // in fact two bags to show preview
 BlockBag *newBlockBag();
