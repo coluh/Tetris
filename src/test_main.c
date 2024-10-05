@@ -2,13 +2,14 @@
 #include "config/config.h"
 #include "common/utils.h"
 #include "common/hashmap.h"
-
-#include <stdio.h>
+#include "common/arraylist.h"
 
 #include <signal.h>
+#include <string.h>
 #include "common/errhandle.h"
 
 void test_map();
+void test_arraylist();
 
 int main() {
 	signal(SIGSEGV, segv_handler);
@@ -19,7 +20,35 @@ int main() {
 	const int *p = getConfigModule("layout")->getIntArray("FontColorActive");
 	Debug("Array: %d %d %d %d", p[0], p[1], p[2], p[3]);
 	test_map();
+	test_arraylist();
 	return 0;
+}
+
+struct TESTNODE {
+	int id;
+	char name[10];
+	float v;
+};
+
+void test_arraylist() {
+	List *list = newList(sizeof(struct TESTNODE));
+	const char *s[8] = { "zhao", "qian", "sun", "li", "Tom", "Chou", "Joe", "Van" };
+	for (int i = 0; i < 8; i++) {
+		struct TESTNODE t = { .id = i+1, .v = 1.0f / (i+1) + i+1 };
+		strcpy(t.name, s[i]);
+		listAdd(list, &t);
+	}
+	listDelete(list, 0);
+	listDelete(list, 3);
+	listDelete(list, 5);
+	listDelete(list, 0);
+	listDelete(list, 2);
+	// should left "sun", "li", "Joe"
+	for (int i = 0; i < listLength(list); i++) {
+		struct TESTNODE *t = (struct TESTNODE *)listGet(list, i);
+		Debug("%d: %s: %.2f", t->id, t->name, t->v);
+	}
+	freeList(list);
 }
 
 void test_map() {
@@ -28,6 +57,4 @@ void test_map() {
 	insertHashMap(map, "dog", (int []){4});
 	insertHashMap(map, "coffee", (int []){5});
 	Debug("cat: %d\tdog: %d\tcoffee: %d", *(int*)findHashMap(map, "cat"), *(int*)findHashMap(map, "dog"), *(int*)findHashMap(map, "coffee"));
-	int *p = NULL;
-	*p = 1;
 }

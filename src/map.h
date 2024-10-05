@@ -13,10 +13,9 @@ void freeMap(Map *m);
 
 bool hasFallingBlock(Map *map);
 bool hasHold(Map *map);
-// returm 1 on fail
-int fall(Map *map);
 // move in specific way
 int move(Map *map, int dx, int dy);
+void drop(Map *map);
 // rotate clockwise for times
 int rotate(Map *map, int times);
 // hold

@@ -38,7 +38,7 @@ struct BlockBag {
 
 // for analyser program
 static int blockColor[BLOCK_NUM][3] = {
-	{0, 127, 255},
+	{0, 255, 255},
 	{255, 255, 0},
 	{127, 0, 255},
 	{0, 255, 0},
@@ -52,6 +52,32 @@ const int *getBlockColor(int btype) { return blockColor[btype]; }
 static int blockShape[BLOCK_NUM][ROTATE_NUM][4][2];
 const int (*getBlockShape(int type, int rotate))[2] {
 	return blockShape[type][rotate];
+}
+
+int getBlockWidth(BlockType b, RotateState r) {
+	const int (*shape)[2] = getBlockShape(b, r);
+	int minx = shape[0][0];
+	int maxx = shape[0][0];
+	for (int i = 0; i < 4; i++) {
+		if (shape[i][0] < minx)
+			minx = shape[i][0];
+		if (shape[i][0] > maxx)
+			maxx = shape[i][0];
+	}
+	return maxx - minx + 1;
+}
+
+float getBlockCenterX(BlockType b, RotateState r) {
+	const int (*shape)[2] = getBlockShape(b, r);
+	int minx = shape[0][0];
+	int maxx = shape[0][0];
+	for (int i = 0; i < 4; i++) {
+		if (shape[i][0] < minx)
+			minx = shape[i][0];
+		if (shape[i][0] > maxx)
+			maxx = shape[i][0];
+	}
+	return (float)(maxx + minx) / 2 + 0.5;
 }
 
 void initBlockConfig() {/*{{{*/
@@ -211,5 +237,4 @@ void drawBlockShadow(BlockType b, const SDL_Rect *rect) {
 		}, 5);
 	}
 }
-
 

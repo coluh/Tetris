@@ -44,7 +44,7 @@ static void checkLineWrapper(Map *map) {
 // TODO: these are to ugly
 static int forward(Map *map, BlockBag *bag) {
 	if (hasFallingBlock(map)) {
-		if (fall(map) != 0) {
+		if (move(map, 0, -1) != 0) {
 			lock(map);
 			checkLineWrapper(map);
 			return forward(map, bag);
@@ -54,7 +54,7 @@ static int forward(Map *map, BlockBag *bag) {
 			return 1;
 		} else {
 			// Tetris Guideline asked for this.
-			if (fall(map) != 0) {
+			if (move(map, 0, -1) != 0) {
 				lock(map);
 				checkLineWrapper(map);
 				return forward(map, bag);
@@ -82,9 +82,7 @@ static int handleInput(Map *map, BlockBag *bag, int opt) {
 		move(map, 0, -1);
 		break;
 	case OPT_DROP:
-		while (move(map, 0, -1) == 0)
-			;
-		lock(map);
+		drop(map);
 		checkLineWrapper(map);
 		Debug("Lines: %d", s.lines);
 		return forward(map, bag);
