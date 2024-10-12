@@ -1,0 +1,93 @@
+#include "player.h"
+#include "block.h"
+#include "common/utils.h"
+#include "map.h"
+#include <stdlib.h>
+
+struct Player {
+	int id;
+	Map *map;
+	BlockBag *bag;
+	struct {
+		int lines;
+		int level;
+		int points;
+		int combo;
+	} score;
+	bool over; // died
+
+	// keymaps
+	int keys[OPT_NUM];
+};
+
+Player *newPlayer(int id) {
+	Player *p = calloc(1, sizeof(struct Player));
+	p->id = id;
+	p->map = newMap(NULL);
+	p->bag = newBlockBag();
+	return p;
+}
+
+void playerSetMap(Player *p, Map *map) {
+	if (p->map) {
+		freeMap(p->map);
+	}
+	p->map = map;
+}
+void playerGetScore(Player *p, int *lines, int *level, int *points) {
+	if (lines) {
+		*lines = p->score.lines;
+	}
+	if (level) {
+		*level = p->score.level;
+	}
+	if (points) {
+		*points = p->score.points;
+	}
+}
+bool playerOver(Player *p) {
+	return p->over;
+}
+
+static void playerOperate(Player *p, int opt) {
+	if (!hasFallingBlock(p->map)) {
+		if (opt == OPT_PAUSE) {
+			Debug("Pause");
+		}
+		return;
+		// make sure there is a falling block before move
+	}
+	switch (opt) {
+	case OPT_LEFT:
+		break;
+	case OPT_RIGHT:
+		break;
+	case OPT_SOFT:
+		break;
+	case OPT_DROP:
+		break;
+	case OPT_ROTATER:
+		break;
+	case OPT_ROTATEC:
+		break;
+	case OPT_HOLD:
+		break;
+	case OPT_PAUSE:
+		break;
+	}
+}
+void playerHandleKey(Player *p, int key) {
+	for (int i = OPT_EMPTY; i < OPT_NUM; i++) {
+		if (p->keys[i] == key) {
+			playerOperate(i);
+		}
+	}
+}
+void playerForward(Player *p) {}
+
+void playerDraw(Player *p) {
+	drawMap(p->map);
+	drawBag(p->bag, p->map);
+	drawHold(p->map);
+}
+
