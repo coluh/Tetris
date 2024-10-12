@@ -2,37 +2,15 @@
 #define __CONFIG_H__
 
 #include "parser.h"
+#include "../common/utils.h"
 
 #include <strings.h>
 
-#define MAX_ARRAY_LEN 10
-
-/* 
- * getConfig()
- *     .getModule("strings")
- *         .getString("exit");
- *         .setString("exit", "Quit");
- *     .getModule("rules")
- *         .getInt("LockDelay");
- *         .setInt("LockDelay", 500);
- *     .getModule("keymap")
- *         .writeToFile();
- *     .load("./config/");
- * */
-typedef struct ConfigModule {
-	char *name;
-	Table *data;
-	const char * (*getString)(const char *);
-	int (*getInt)(const char *);
-	const int *(*getIntArray)(const char *);
-	void (*setString)(const char *, const char *);
-	void (*setInt)(const char *, int);
-	void (*setIntArray)(const char *, int *);
-	void (*writeToFile)(void);
-	struct ConfigModule *next;
-} ConfigModule;
-ConfigModule *getConfigModule(const char *);
-void loadConfig(const char *configDir);
+typedef struct ConfigModule ConfigModule;
+void loadConfig(const char *config);
 void freeConfig();
+const char *getConfigString(const char *module, const char *key);
+const int getConfigInt(const char *module, const char *key);
+const ArrayInt getConfigArray(const char *module, const char *key);
 
 #endif // __CONFIG_H__

@@ -3,8 +3,6 @@
 #include "common/utils.h"
 #include "common/intmap.h"
 
-#include <stdlib.h>
-
 #include <SDL2/SDL.h>
 
 static IntMap *keymap;
@@ -18,9 +16,9 @@ void initInputConfig() {
 		"empty", "Left", "Right", "Down", "Drop", "RotateR", "RotateC", "Hold", "Pause",
 	};
 	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
-		const int *p = getConfigModule("keymap")->getIntArray(options[i]);
-		for (int j = 0; p[j] != 0; j++) {
-			insertIntMap(keymap, p[j], i);
+		ArrayInt p = getConfigArray("KeyMap1", options[i]);
+		for (int j = 0; j < p.length; j++) {
+			insertIntMap(keymap, p.data[j], i);
 		}
 	}
 }

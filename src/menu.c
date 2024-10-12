@@ -29,15 +29,15 @@ static int marginV;
 extern int fontsize;
 
 void initMenuConfig() {
-	fontColorInactive = ColorArray(getConfigModule("layout")->getIntArray("FontColorInactive"));
-	fontColorActive = ColorArray(getConfigModule("layout")->getIntArray("FontColorActive"));
-	entryColorInactive = ColorArrayA(getConfigModule("layout")->getIntArray("EntryColorInactive"));
-	entryColorActive = ColorArrayA(getConfigModule("layout")->getIntArray("EntryColorActive"));
-	menuColor = ColorArrayA(getConfigModule("layout")->getIntArray("MenuColor"));
-	paddingH = getConfigModule("layout")->getInt("PaddingH");
-	paddingV = getConfigModule("layout")->getInt("PaddingV");
-	marginH = getConfigModule("layout")->getInt("MarginH");
-	marginV = getConfigModule("layout")->getInt("MarginV");
+	fontColorInactive = ColorArray(getConfigArray("Color", "FontColorInactive").data);
+	fontColorActive = ColorArray(getConfigArray("Color", "FontColorActive").data);
+	entryColorInactive = ColorArrayA(getConfigArray("Color", "EntryColorInactive").data);
+	entryColorActive = ColorArrayA(getConfigArray("Color", "EntryColorActive").data);
+	menuColor = ColorArrayA(getConfigArray("Color", "MenuColor").data);
+	paddingH = getConfigInt("Layout", "PaddingH");
+	paddingV = getConfigInt("Layout", "PaddingV");
+	marginH = getConfigInt("Layout", "MarginH");
+	marginV = getConfigInt("Layout", "MarginV");
 }
 
 struct MenuEntry {

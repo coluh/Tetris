@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 void shuffle(int *array, int n) {
@@ -38,6 +39,12 @@ int toInt(const char *string) {
 	}
 	d *= k;
 	return d;
+}
+
+char *copyString(const char *other) {
+	char *n = malloc(strlen(other) + 1);
+	strcpy(n, other);
+	return n;
 }
 
 void printError(const char *msg, const char *file, int line, const char *function) {

@@ -37,11 +37,11 @@ SDL_Texture *createTextTexture(const char *string, SDL_Color color) {
 }
 
 void initRender() {
-	const int *p = getConfigModule("layout")->getIntArray("BackgroundColor");
+	const int *p = getConfigArray("Color", "BackgroundColor").data;
 	backgroundColor = Color(p[0], p[1], p[2]);
-	windowWidth = getConfigModule("layout")->getInt("WindowWidth");
-	windowHeight = getConfigModule("layout")->getInt("WindowHeight");
-	fontsize = getConfigModule("layout")->getInt("FontSize");
+	windowWidth = getConfigInt("Layout", "WindowWidth");
+	windowHeight = getConfigInt("Layout", "WindowHeight");
+	fontsize = getConfigInt("Layout", "FontSize");
 	SDL_Init(SDL_INIT_VIDEO);
 	TTF_Init();
 	render.window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
