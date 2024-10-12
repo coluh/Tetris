@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#define null NULL
+
 #define CSI_BLACK	"\x1B[1;30m"
 #define CSI_RED		"\x1B[1;31m"
 #define CSI_GREEN	"\x1B[1;32m"
