@@ -4,7 +4,7 @@
 ### FREATURES
 
 - [x] Ghost Block
-- [ ] Hold
+- [x] Hold
 - [x] Score Module
 - [ ] SRS
 - [ ] T-Spins
@@ -15,7 +15,7 @@
 
 - [ ] Start Menu Background Animation
 - [ ] Config Module
-- [ ] Move(drop, kick) Visual Effects
+- [x] Move(drop, kick) Visual Effects
 - [ ] Sound Effects
 - [ ] DoublePlayer
 - [ ] Web
