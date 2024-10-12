@@ -49,12 +49,12 @@ static int blockStartY;
 static int fieldMargin;
 
 void initMapConfig() {
-	fieldWidth = getConfigModule("rules")->getInt("FieldWidth");
-	fieldHeight = getConfigModule("rules")->getInt("FieldHeight");
-	fieldHeightVisible = getConfigModule("rules")->getInt("FieldHeightVisible");
-	blockStartX = getConfigModule("rules")->getInt("BlockStartX");
-	blockStartY = getConfigModule("rules")->getInt("BlockStartY");
-	fieldMargin = getConfigModule("rules")->getInt("FieldMargin");
+	fieldWidth = getConfigInt("Rule", "FieldWidth");
+	fieldHeight = getConfigInt("Rule", "FieldHeight");
+	fieldHeightVisible = getConfigInt("Rule", "FieldHeightVisible");
+	blockStartX = getConfigInt("Rule", "BlockStartX");
+	blockStartY = getConfigInt("Rule", "BlockStartY");
+	fieldMargin = getConfigInt("Layout", "FieldMargin");
 }
 
 static BlockType blockAt(const Map *map, int x, int y) {

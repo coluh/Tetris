@@ -16,11 +16,19 @@
 void shuffle(int *array, int n);
 int toInt(const char *string);
 
+typedef struct ArrayInt {
+	int *data;
+	int length;
+} ArrayInt;
+
+#define newArrayInt(p, len) (ArrayInt){ .data=p, .length=len };
+
 #define Rect(x, y, w, h) ((SDL_Rect){x, y, w, h})
 
 #define inRect(mx, my, r) (((mx) >= (r).x) && ((mx) < (r).x+(r).w) \
 		&& ((my) >= (r).y) && ((my) < (r).y+(r).h))
 
+char *copyString(const char *other);
 
 /**
  * Error Handling

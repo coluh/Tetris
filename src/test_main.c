@@ -14,11 +14,8 @@ void test_arraylist();
 int main() {
 	signal(SIGSEGV, segv_handler);
 	loadConfig("./config");
-	Debug("Value: %s", getConfigModule("rules")->getString("LockDelay"));
-	Debug("Value: %s", getConfigModule("strings")->getString("double_player"));
-	Debug("Array Value: %d", getConfigModule("layout")->getIntArray("MenuColor")[0]);
-	const int *p = getConfigModule("layout")->getIntArray("FontColorActive");
-	Debug("Array: %d %d %d %d", p[0], p[1], p[2], p[3]);
+	ArrayInt p = getConfigArray("Layout", "FontColorActive");
+	Debug("Array: %d %d %d %d", p.data[0], p.data[1], p.data[2], p.data[3]);
 	test_map();
 	test_arraylist();
 	return 0;
@@ -57,4 +54,6 @@ void test_map() {
 	insertHashMap(map, "dog", (int []){4});
 	insertHashMap(map, "coffee", (int []){5});
 	Debug("cat: %d\tdog: %d\tcoffee: %d", *(int*)findHashMap(map, "cat"), *(int*)findHashMap(map, "dog"), *(int*)findHashMap(map, "coffee"));
+
+	;
 }

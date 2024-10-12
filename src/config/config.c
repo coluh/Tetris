@@ -8,108 +8,102 @@
 #include <dirent.h>
 #include <unistd.h>
 
-typedef struct Config {
-	char *configDir;
-	ConfigModule *modules;
-} Config;
+#define MAX_ARRAY_LEN 10
 
-static Config config;
-static ConfigModule *this;
+struct ConfigModule {
+	char *name;
+	Table data;
+	struct ConfigModule *next;
+};
 
-ConfigModule *getConfigModule(const char *filename) {
-	char *name = malloc(strlen(filename) + 1);
-	strcpy(name, filename);
-	if (strstr(name, ".cfg"))
-		*strstr(name, ".cfg") = '\0';
-	for (ConfigModule *p = config.modules; p != NULL; p = p->next) {
-		if (strcmp(p->name, name) == 0) {
-			this = p;
-			free(name);
-			return this;
+static char *configFile;
+static ConfigModule *configs;
+
+static void addModule(char *name, Table data);
+
+void loadConfig(const char *config) {
+	FILE *fp = fopen(config, "r");
+	Assert(fp != NULL, "config file not found");
+
+	if (configFile)
+		free(configFile);
+	configFile = copyString(config);
+
+	char *k, *v;
+	int line;
+	while ((line = checkFormat(fp, &k, &v)) == PARSER_LINE_SKIP)
+		;
+	while (!feof(fp)) {
+		Assert(line == PARSER_LINE_NAME, "format error in config file: name should be first");
+		char *name = copyString(k);
+
+		Table data = newTable();
+		while ((line = checkFormat(fp, &k, &v)) != PARSER_LINE_NAME) {
+			if (line == PARSER_LINE_SKIP) {
+				if (feof(fp)) {
+					break;
+				}
+				continue;
+			}
+			Assert(line != PARSER_LINE_UNKNOWN, "format error in config file: unknown line");
+			addEntry(&data, k, v);
 		}
+		addModule(name, data);
 	}
-	Debug("Config Module %s Not Found", name);
-	free(name);
-	return NULL;
-}
 
-static void addModule(const char *name, Table *data);
-
-void loadConfig(const char *configDir) {
-	char configdir[256];
-	// TODO: Error Handling
-	strcpy(configdir, configDir);
-	if (configdir[strlen(configdir)-1] == '/')
-		configdir[strlen(configdir)-1] = '\0';
-
-	DIR *dp = opendir(configdir);
-	Assert(dp != NULL, "configdir not found");
-
-	/*char cwd[128];*/
-	/*getcwd(cwd, 128);*/
-	/*Debug("Current Directory: %s\n", cwd);*/
-	config.configDir = malloc(strlen(configdir) + 1);
-	strcpy(config.configDir, configdir);
-	Debug("config dir: %s", config.configDir);
-
-	struct dirent *entry;
-	while ((entry = readdir(dp))) {
-		const char *filename = entry->d_name;
-		if (filename[0] == '.')
-			continue;
-		if (!strstr(filename, ".cfg")) {
-			continue;
-		} else {
-			Debug("find config file: %s%s", CSI_GREEN, filename);
-		}
-		if (getConfigModule(filename)) {
-			Debug("Module %s already load", filename);
-			continue;// TODO: reload config
-		}
-		char path[512];
-		snprintf(path, sizeof(path), "%s/%s", configdir, filename);
-		Table *table = readConfig(path);
-		if (!table) {
-			Debug("Skip %s%s", CSI_GREEN, path);
-			continue;
-		}
-
-		addModule(filename, table);
-	}
-	closedir(dp);
+	fclose(fp);
 }
 
 static void freeModule(ConfigModule *m) {
 	if (m == NULL)
 		return;
 	freeModule(m->next);
+
 	free(m->name);
 	freeTable(m->data);
 	free(m);
 }
 void freeConfig() {
-	free(config.configDir);
-	freeModule(config.modules);
+	freeModule(configs);
+	free(configFile);
 }
 
-const char * getString(const char * key) {
-	return tableFind(this->data, key);
+static void addModule(char *name, Table data) {
+	ConfigModule **p = &configs;
+	for (; *p != NULL; p = &(*p)->next)
+		;
+	*p = calloc(1, sizeof(struct ConfigModule));
+	ConfigModule *this = *p;
+
+	this->name = name;
+	this->data = data;
 }
-void setString(const char *key, const char *value) {
-	Error("Not_Implement");
+
+static ConfigModule *findModule(const char *name) {
+	for (ConfigModule *p = configs; p != NULL; p = p->next) {
+		if (strcmp(p->name, name) == 0) {
+			return p;
+		}
+	}
+	Error("ConfigModule Not Found");
+	Debug("%s", name);
+	return NULL;
 }
-int getInt(const char *key) {
-	return toInt(tableFind(this->data, key));
+
+const char *getConfigString(const char *module, const char *key) {
+	return tableFind(findModule(module)->data, key);
 }
-void setInt(const char *key, int value) {
-	Error("Not_Implement");
+const int getConfigInt(const char *module, const char *key) {
+	return toInt(tableFind(findModule(module)->data, key));
 }
-const int *getIntArray(const char *key) {
+
+const ArrayInt getConfigArray(const char *module, const char *key) {
 	static int t[MAX_ARRAY_LEN + 1];
-	const char *v = tableFind(this->data, key);
-	char *s = malloc(strlen(v) + 1);
-	strcpy(s, v);
+
+	const char *v = tableFind(findModule(module)->data, key);
+	char *s = copyString(v);
 	char *word = &s[0];
+
 	int index = 0;
 	for (int i = 0; s[i] != '\0'; i++) {
 		if (s[i] == ',') {
@@ -120,37 +114,7 @@ const int *getIntArray(const char *key) {
 	}
 	if(*word != '\0')
 		t[index++] = atoi(word);
-	t[index] = 0;
 	free(s);
-	return t;
+	return newArrayInt(t, index);
 }
-void setIntArray(const char *key, int *value) {
-	Error("Not_Implement");
-}
-void writeToFile() {
-	Error("Not_Implement");
-}
-
-static void addModule(const char *filename, Table *data) {
-	ConfigModule **p = &config.modules;
-	for (; *p != NULL; p = &(*p)->next)
-		;
-	*p = calloc(1, sizeof(struct ConfigModule));
-	ConfigModule *this = *p;
-
-	char *name = malloc(strlen(filename) + 1);
-	strcpy(name, filename);
-	*strstr(name, ".cfg") = '\0';
-	this->name = name;
-
-	this->data = data;
-	this->getString = getString;
-	this->getInt = getInt;
-	this->getIntArray = getIntArray;
-	this->setString = setString;
-	this->setInt = setInt;
-	this->setIntArray = setIntArray;
-	this->writeToFile = writeToFile;
-}
-
 

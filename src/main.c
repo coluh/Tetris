@@ -14,7 +14,7 @@
 int main() {
 
 	signal(SIGSEGV, segv_handler);
-	loadConfig("./config/");
+	loadConfig("./config/game.cfg");
 	initRender();
 	initMenuConfig();
 	initBlockConfig();
