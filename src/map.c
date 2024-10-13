@@ -154,11 +154,8 @@ void drop(Map *map) {
 
 int rotate(Map *map, int times) {
 	Assert(map->falling != NULL, "rotate() when no falling block");
-	if (map->falling->rotate == ROTATE_L) {
-		map->falling->rotate = ROTATE_0;
-	} else {
-		map->falling->rotate++;
-	}
+	map->falling->rotate += times;
+	map->falling->rotate %= ROTATE_NUM;
 	if (stuck(map)) {
 		rotate(map, 4 - times);
 		return 1;
