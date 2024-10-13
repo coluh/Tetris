@@ -2,6 +2,8 @@
 #include "common/utils.h"
 #include "player.h"
 #include "render.h"
+#include "config/config.h"
+
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_timer.h>
@@ -10,9 +12,18 @@
 
 static bool running;
 
-void singleplayer() {
+void singlePlayer() {
 
 	Player *p = newPlayer(1);
+	const char *kn[] = {
+		"", "Left", "Right", "Down", "Drop",
+		"RotateR", "RotateC", "Hold", "Pause",
+	};
+	int keys[OPT_NUM];
+	for (int i = OPT_LEFT; i <= OPT_PAUSE; i++) {
+		keys[i] = getConfigInt("KeyMap1", kn[i]);
+	}
+	playerSetKeys(p, keys);
 
 	uint32_t last = SDL_GetTicks();
 	uint32_t current;

@@ -250,6 +250,7 @@ static void drawDropEffect(Map *m, struct DropEffect *eff);
 
 void drawMap(Map *m) {
 	SDL_Renderer *r = getRenderer();
+	SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
 	SDL_RenderFillRect(r, &m->rect);
 	int a = m->rect.w / fieldWidth;
 	// draw drop dropEffects
