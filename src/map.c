@@ -153,15 +153,55 @@ void drop(Map *map) {
 	lock(map);
 }
 
+// Here comes the SRS part!
+int nKickData[8][4][2] = {
+	{{ -1, 0 }, { -1, 1 }, { 0, -2 }, { -1, -2 },},
+	{{ 1, 0 }, { 1, -1 }, { 0, 2 }, { 1, 2 },},
+	{{ 1, 0 }, { 1, -1 }, { 0, 2 }, { 1, 2 },},
+	{{ -1, 0 }, { -1, 1 }, { 0, -2 }, { -1, -2 },},
+	{{ 1, 0 }, { 1, 1 }, { 0, -2 }, { 1, -2 }},
+	{{ -1, 0 }, { -1, -1 }, { 0, 2 }, { -1, 2 }},
+	{{ -1, 0 }, { -1, -1 }, { 0, 2 }, { -1, 2 }},
+	{{ 1, 0 }, { 1, 1 }, { 0, -2 }, { 1, -2 }},
+};
+int iKickData[8][4][2] = {
+	{{-2,0},{1,0},{-2,-1},{1,2}},
+	{{2,0},{-1,0},{2,1},{-1,-2}},
+	{{-1,0},{2,0},{-1,2},{2,-1}},
+	{{1,0},{-2,0},{1,-2},{-2,1}},
+	{{2,0},{-1,0},{2,1},{-1,-2}},
+	{{-2,0},{1,0},{-2,-1},{1,2}},
+	{{1,0},{-2,0},{1,-2},{-2,1}},
+	{{-1,0},{2,0},{-1,2},{2,-1}},
+};
 int rotate(Map *map, int times) {
 	Assert(map->falling != NULL, "rotate() when no falling block");
+	Assert(times == 1 || times == 3, "rotate 180 not implemented");
+	int type;
+	if (times == 1) {
+		type = map->falling->rotate * 2;
+	} else {
+		type = map->falling->rotate * 2 - 1;
+		type %= 8;
+	}
 	map->falling->rotate += times;
 	map->falling->rotate %= ROTATE_NUM;
-	if (stuck(map)) {
-		rotate(map, 4 - times);
-		return 1;
+	if (!stuck(map))
+		return 0;
+	int (*kickdata)[4][2];
+	if (map->falling->type == BLOCK_I)
+		kickdata = iKickData;
+	else
+		kickdata = nKickData;
+	for (int t = 0; t < 4; t++) {
+		int dx = kickdata[type][t][0];
+		int dy = kickdata[type][t][1];
+		int r = move(map, dx, dy);
+		if (r == 0)
+			return 0;
 	}
-	return 0;
+	rotate(map, 4 - times);
+	return 1;
 }
 
 // TODO: MISS A RULE

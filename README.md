@@ -6,7 +6,7 @@
 - [x] Ghost Block
 - [x] Hold
 - [x] Score Module
-- [ ] SRS
+- [x] SRS
 - [ ] T-Spins
 - [ ] Lock Down Delay
 - [ ] Background Music
@@ -14,7 +14,7 @@
 - [ ] More Game Modes
 
 - [ ] Start Menu Background Animation
-- [ ] Config Module
+- [x] Config Module
 - [x] Move(drop, kick) Visual Effects
 - [ ] Sound Effects
 - [ ] DoublePlayer
