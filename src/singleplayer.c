@@ -19,11 +19,12 @@ void singlePlayer() {
 		"", "Left", "Right", "Down", "Drop",
 		"RotateR", "RotateC", "Hold", "Pause",
 	};
-	int keys[OPT_NUM];
+	ArrayInt keymap[OPT_NUM];
 	for (int i = OPT_LEFT; i <= OPT_PAUSE; i++) {
-		keys[i] = getConfigInt("KeyMap1", kn[i]);
+		const ArrayInt p = getConfigArray("KeyMap2", kn[i]);
+		ArrayIntCopy(&keymap[i], &p);
 	}
-	playerSetKeys(p, keys);
+	playerSetKeys(p, keymap);
 
 	uint32_t last = SDL_GetTicks();
 	uint32_t current;

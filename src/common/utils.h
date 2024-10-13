@@ -23,6 +23,8 @@ typedef struct ArrayInt {
 	int length;
 } ArrayInt;
 
+void ArrayIntCopy(ArrayInt *dst, const ArrayInt *src);
+
 #define newArrayInt(p, len) (ArrayInt){ .data=p, .length=len };
 
 #define Rect(x, y, w, h) ((SDL_Rect){x, y, w, h})

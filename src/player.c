@@ -18,7 +18,8 @@ struct Player {
 	bool over; // died
 
 	// keymaps
-	int keys[OPT_NUM];
+	/*int keys[OPT_NUM];*/
+	ArrayInt keymap[OPT_NUM];
 };
 
 Player *newPlayer(int id) {
@@ -30,9 +31,11 @@ Player *newPlayer(int id) {
 	return p;
 }
 
-void playerSetKeys(Player *p, int keys[OPT_NUM]) {
-	for (int i = OPT_EMPTY; i < OPT_NUM; i++)
-		p->keys[i] = keys[i];
+void playerSetKeys(Player *p, ArrayInt keymap[OPT_NUM]) {
+	for (int i = OPT_EMPTY; i < OPT_NUM; i++) {
+		p->keymap[i].data = keymap[i].data;
+		p->keymap[i].length = keymap[i].length;
+	}
 }
 
 void playerSetMap(Player *p, Map *map) {
@@ -122,10 +125,11 @@ static void playerOperate(Player *p, int opt) {
 }
 
 void playerHandleKey(Player *p, int key) {
-	for (int i = OPT_EMPTY; i < OPT_NUM; i++) {
-		if (p->keys[i] == key) {
-			playerOperate(p, i);
-		}
+	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
+		const ArrayInt *a = &p->keymap[i];
+		for (int j = 0; j < a->length; j++)
+			if (a->data[j] == key)
+				playerOperate(p, i);
 	}
 }
 

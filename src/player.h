@@ -2,6 +2,7 @@
 #define TETRIS_PLAYER_H
 
 #include "map.h"
+#include "common/utils.h"
 
 #define OPT_EMPTY	0
 #define OPT_LEFT	1
@@ -19,7 +20,7 @@ typedef struct Player Player;
 Player *newPlayer(int id);
 // re-set the map
 void playerSetMap(Player *p, Map *map);
-void playerSetKeys(Player *p, int keys[OPT_NUM]);
+void playerSetKeys(Player *p, ArrayInt keymap[OPT_NUM]);
 void playerGetScore(Player *p, int *lines, int *level, int *points);
 bool playerOver(Player *p);
 
