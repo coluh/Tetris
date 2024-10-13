@@ -22,6 +22,7 @@ struct Map {
 	BlockType *block;
 	FallingBlock *falling;
 	BlockType hold;
+	bool usedHold;
 
 	// Layout
 	SDL_Rect rect;
@@ -165,6 +166,7 @@ int rotate(Map *map, int times) {
 
 // TODO: MISS A RULE
 void hold(Map *map) {
+	if (map->usedHold) return;
 	if (map->hold == BLOCK_NE) {
 		map->hold = map->falling->type;
 		free(map->falling);
@@ -179,6 +181,7 @@ void hold(Map *map) {
 		map->falling->rotate = ROTATE_0;
 		// TODO: maybe should check
 	}
+	map->usedHold = true;
 }
 
 void lock(Map *map) {
@@ -191,6 +194,7 @@ void lock(Map *map) {
 	}
 	free(map->falling);
 	map->falling = NULL;
+	map->usedHold = false;
 }
 
 int checkLine(Map *map) {
