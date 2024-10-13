@@ -117,5 +117,6 @@ const char *tableFind(Table table, const char *key) {
 			return p->value;
 	}
 	Error("KEY Not Found");
+	Debug("Key %s", key);
 	return NULL;
 }

@@ -41,6 +41,14 @@ int toInt(const char *string) {
 	return d;
 }
 
+void ArrayIntCopy(ArrayInt *dst, const ArrayInt *src) {
+	/*if (dst->data) free(dst->data);*/
+	dst->data = malloc(src->length * sizeof(int));
+	for (int i = 0; i < src->length; i++)
+		dst->data[i] = src->data[i];
+	dst->length = src->length;
+}
+
 char *copyString(const char *other) {
 	char *n = malloc(strlen(other) + 1);
 	strcpy(n, other);

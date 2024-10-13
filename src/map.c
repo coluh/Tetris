@@ -22,6 +22,7 @@ struct Map {
 	BlockType *block;
 	FallingBlock *falling;
 	BlockType hold;
+	bool usedHold;
 
 	// Layout
 	SDL_Rect rect;
@@ -154,11 +155,8 @@ void drop(Map *map) {
 
 int rotate(Map *map, int times) {
 	Assert(map->falling != NULL, "rotate() when no falling block");
-	if (map->falling->rotate == ROTATE_L) {
-		map->falling->rotate = ROTATE_0;
-	} else {
-		map->falling->rotate++;
-	}
+	map->falling->rotate += times;
+	map->falling->rotate %= ROTATE_NUM;
 	if (stuck(map)) {
 		rotate(map, 4 - times);
 		return 1;
@@ -168,6 +166,7 @@ int rotate(Map *map, int times) {
 
 // TODO: MISS A RULE
 void hold(Map *map) {
+	if (map->usedHold) return;
 	if (map->hold == BLOCK_NE) {
 		map->hold = map->falling->type;
 		free(map->falling);
@@ -182,6 +181,7 @@ void hold(Map *map) {
 		map->falling->rotate = ROTATE_0;
 		// TODO: maybe should check
 	}
+	map->usedHold = true;
 }
 
 void lock(Map *map) {
@@ -194,6 +194,7 @@ void lock(Map *map) {
 	}
 	free(map->falling);
 	map->falling = NULL;
+	map->usedHold = false;
 }
 
 int checkLine(Map *map) {
@@ -250,6 +251,7 @@ static void drawDropEffect(Map *m, struct DropEffect *eff);
 
 void drawMap(Map *m) {
 	SDL_Renderer *r = getRenderer();
+	SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
 	SDL_RenderFillRect(r, &m->rect);
 	int a = m->rect.w / fieldWidth;
 	// draw drop dropEffects

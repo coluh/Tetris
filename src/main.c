@@ -3,7 +3,6 @@
 #include "map.h"
 #include "menu.h"
 #include "block.h"
-#include "input.h"
 
 #include "singleplayer.h"
 #include "settings.h"
@@ -19,7 +18,6 @@ int main() {
 	initMenuConfig();
 	initBlockConfig();
 	initMapConfig();
-	initInputConfig();
 
 	Menu *start = new_Menu(1400, 1000);
 	addMenuEntry(start, "Single Player", singlePlayer);

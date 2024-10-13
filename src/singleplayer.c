@@ -1,152 +1,53 @@
 #include "singleplayer.h"
-#include "render.h"
 #include "common/utils.h"
-#include "map.h"
-#include "block.h"
-#include "input.h"
+#include "player.h"
+#include "render.h"
+#include "config/config.h"
 
-#include <SDL2/SDL.h>
-
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-static SDL_Color BGCOLOR = {0, 127, 233, 255};
-
-static struct {
-	int comboNow;
-	int lines;
-	int level;
-	int points;
-} s;
-
-static void checkLineWrapper(Map *map) {
-	int line = checkLine(map);
-	if (line > 0)
-		s.comboNow++;
-	else
-		s.comboNow = 0;
-	s.lines += line;
-	int k[5] = {0, 100, 300, 500, 800};
-	s.points += k[line] * s.level;
-	if (line)
-		Debug("%d line! +%d", line, k[line] * s.level);
-	if (s.comboNow > 1) {
-		s.points += 50 * s.comboNow * s.level;
-		Debug("\t %d Combo! +%d", s.comboNow, 50 * s.comboNow * s.level);
-	}
-	if (perfectClear(map)) {
-		int kp[5] = {0, 800, 1200, 1800, 2000};
-		s.points += kp[line] * s.level;
-		Debug("\t Perfect Clear! +%d", kp[line] * s.level);
-	}
-}
-
-// TODO: these are to ugly
-static int forward(Map *map, BlockBag *bag) {
-	if (hasFallingBlock(map)) {
-		if (move(map, 0, -1) != 0) {
-			lock(map);
-			checkLineWrapper(map);
-			return forward(map, bag);
-		}
-	} else {
-		if (putBlock(map, popBlock(bag)) != 0) {
-			return 1;
-		} else {
-			// Tetris Guideline asked for this.
-			if (move(map, 0, -1) != 0) {
-				lock(map);
-				checkLineWrapper(map);
-				return forward(map, bag);
-			}
-		}
-	}
-	return 0;
-}
-
-static int handleInput(Map *map, BlockBag *bag, int opt) {
-	if (!hasFallingBlock(map)) {
-		if (opt == OPT_PAUSE) {
-			Debug("Pause");
-		}
-		return 0;
-	}
-	switch (opt) {
-	case OPT_LEFT:
-		move(map, -1, 0);
-		break;
-	case OPT_RIGHT:
-		move(map, 1, 0);
-		break;
-	case OPT_SOFT:
-		move(map, 0, -1);
-		break;
-	case OPT_DROP:
-		drop(map);
-		checkLineWrapper(map);
-		Debug("Lines: %d", s.lines);
-		return forward(map, bag);
-		break;
-	case OPT_ROTATER:
-		rotate(map, 3);
-		break;
-	case OPT_ROTATEC:
-		rotate(map, 1);
-		break;
-	case OPT_HOLD:
-		if (!hasHold(map)) {
-			hold(map);
-			putBlock(map, popBlock(bag));
-		} else {
-			hold(map);
-		}
-		break;
-	case OPT_PAUSE:
-		Debug("Clicked Pause");
-		break;
-	default:
-		break;
-	}
-	return 0;
-}
+static bool running;
 
 void singlePlayer() {
 
-	bool running = true;
+	Player *p = newPlayer(1);
+	const char *kn[] = {
+		"", "Left", "Right", "Down", "Drop",
+		"RotateR", "RotateC", "Hold", "Pause",
+	};
+	ArrayInt keymap[OPT_NUM];
+	for (int i = OPT_LEFT; i <= OPT_PAUSE; i++) {
+		const ArrayInt p = getConfigArray("KeyMap2", kn[i]);
+		ArrayIntCopy(&keymap[i], &p);
+	}
+	playerSetKeys(p, keymap);
 
-	SDL_Event event;
 	uint32_t last = SDL_GetTicks();
-	uint32_t start, current, end;
-
-	s.level = 3;
-	Map *map = newMap(NULL);
-	BlockBag *bag = newBlockBag();
-
+	uint32_t current;
+	uint32_t start, end;
+	SDL_Event event;
+	running = true;
 	while (running) {
 		start = SDL_GetTicks();
+
 		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT)
-				running = false;
+			if (event.type == SDL_QUIT) { running = false; break; }
 			if (event.type == SDL_KEYDOWN) {
-				if (handleInput(map, bag, getKeyDownOption(&event)) != 0) {
-					Debug("Game Over");
-					running = false;
-				}
+				playerHandleKey(p, event.key.keysym.sym);
 			}
 		}
 
-		SDL_RenderClear(getRendererColor(BGCOLOR));
-		drawMap(map);
-		drawBag(bag, map);
-		drawHold(map);
+		SDL_RenderClear(getRenderer());
+		playerDraw(p);
 		SDL_RenderPresent(getRenderer());
 
 		current = SDL_GetTicks();
 		if (current - last >= 500 && running) {
-			if (forward(map, bag) != 0) {
-				Debug("Game Over");
-				running = false;
-			}
+			playerForward(p);
 			last = current;
 		}
 
@@ -156,10 +57,14 @@ void singlePlayer() {
 		} else {
 			Warning("Busy");
 		}
+
+		if (playerOver(p)) {
+			running = false;
+		}
 	}
 
-	// game over
-	Debug("Lines: %d\tScore: %d", s.lines, s.points);
-	s.lines = 0;
-	s.points = 0;
+	Debug("Game Over");
+	int lines, points;
+	playerGetScore(p, &lines, NULL, &points);
+	Debug("Lines: " CSI_YELLOW "%d" CSI_END "\tPoints: " CSI_YELLOW "%d" CSI_END, lines, points);
 }
