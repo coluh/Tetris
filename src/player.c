@@ -2,7 +2,9 @@
 #include "block.h"
 #include "common/utils.h"
 #include "map.h"
+#include "render.h"
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 struct Player {
@@ -163,5 +165,24 @@ void playerDraw(Player *p) {
 	drawMap(p->map);
 	drawBag(p->bag, p->map);
 	drawHold(p->map);
+	int x, y, w, h;
+	getMapRect(p->map, &x, &y, &w, &h);
+	y += h/2;
+	x -= w/4;
+	int fontsize = getFontSize();
+	char buf[32];
+	sprintf(buf, "Line: %d", p->score.lines);
+	drawText(buf, x, y);
+	y += fontsize * 1.2;
+	sprintf(buf, "Level: %d", p->score.level);
+	drawText(buf, x, y);
+	y += fontsize * 1.2;
+	sprintf(buf, "Score: %d", p->score.points);
+	drawText(buf, x, y);
+	y += fontsize * 1.2;
+	if (p->score.combo > 0) {
+		sprintf(buf, "Combo %d", p->score.combo);
+		drawText(buf, x, y+150);
+	}
 }
 

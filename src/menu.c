@@ -79,8 +79,8 @@ void addMenuEntry(Menu *m, const char *string, void (*func)(void)) {
 	MenuEntry *this = &m->list[m->list_len];
 	this->string = string;
 	this->func = func;
-	this->text_inactive = createTextTexture(this->string, fontColorInactive);
-	this->text_active = createTextTexture(this->string, fontColorActive);
+	this->text_inactive = createTextTexture(this->string, 0, fontColorInactive);
+	this->text_active = createTextTexture(this->string, 0, fontColorActive);
 	SDL_QueryTexture(this->text_active, NULL, NULL, &this->text_w, &this->text_h);
 	Debug("text_w: %d, text_h: %d", this->text_w, this->text_h);
 	this->active = false;

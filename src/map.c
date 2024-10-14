@@ -87,6 +87,17 @@ Map *newMap(SDL_Rect *rect) {
 	return m;
 }
 
+void getMapRect(Map *map, int *x, int *y, int *w, int *h) {
+	if (x)
+		*x = map->rect.x;
+	if (y)
+		*y = map->rect.y;
+	if (w)
+		*w = map->rect.w;
+	if (h)
+		*h = map->rect.h;
+}
+
 void freeMap(Map *m) {
 	free(m->block);
 }

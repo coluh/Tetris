@@ -12,9 +12,12 @@
 
 void initRender();
 void freeRender();
+int getFontSize();
 SDL_Window *getWindow();
 SDL_Renderer *getRenderer();
 SDL_Renderer *getRendererColor(SDL_Color color);
-SDL_Texture *createTextTexture(const char *string, SDL_Color color);
+SDL_Texture *createTextTexture(const char *string, int small, SDL_Color color);
+
+void drawText(const char *text, int cx, int cy);
 
 #endif // __RENDER_H__

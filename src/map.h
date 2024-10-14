@@ -9,6 +9,7 @@ typedef struct Map Map;
 void initMapConfig();
 
 Map *newMap(SDL_Rect *rect);
+void getMapRect(Map *map, int *x, int *y, int *w, int *h);
 void freeMap(Map *m);
 
 bool hasFallingBlock(Map *map);
@@ -29,6 +30,7 @@ int perfectClear(Map *map);
 // place a new block on the map
 int putBlock(Map *map, BlockType b);
 
+// These should be removef from here!!
 void drawMap(Map *m);
 void drawBag(BlockBag *g, Map *m);
 void drawHold(Map *m);

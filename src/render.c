@@ -3,12 +3,14 @@
 #include "config/config.h"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_ttf.h>
 
 static struct {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	TTF_Font *font;
+	TTF_Font *sfont;
 } render;
 
 SDL_Color backgroundColor;
@@ -16,7 +18,7 @@ int windowWidth;
 int windowHeight;
 int fontsize;
 
-
+int getFontSize() { return fontsize; }
 SDL_Window *getWindow() { return render.window; }
 SDL_Renderer *getRenderer() {
 	SDL_SetRenderDrawColor(render.renderer, ColorUnpack(backgroundColor));
@@ -27,8 +29,12 @@ SDL_Renderer *getRendererColor(SDL_Color color) {
 	return render.renderer;
 }
 
-SDL_Texture *createTextTexture(const char *string, SDL_Color color) {
-	SDL_Surface *surface = TTF_RenderUTF8_Blended(render.font, string, color);
+SDL_Texture *createTextTexture(const char *string, int small, SDL_Color color) {
+	SDL_Surface *surface;
+	if (!small)
+		surface = TTF_RenderUTF8_Blended(render.font, string, color);
+	else
+		surface = TTF_RenderUTF8_Blended(render.sfont, string, color);
 	Assert(surface != NULL, "null surface");
 	SDL_Texture *texture = SDL_CreateTextureFromSurface(render.renderer, surface);
 	Assert(texture!= NULL, "null texture");
@@ -48,7 +54,8 @@ void initRender() {
 		windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
 	if (render.window == NULL) Error(SDL_GetError());
 	render.renderer = SDL_CreateRenderer(render.window, -1, 0);
-	render.font = TTF_OpenFont("./assets/fonts/noto/NotoMono-Regular.ttf", fontsize);
+	render.font = TTF_OpenFont("./assets/fonts/noto/NotoSansMono-Bold.ttf", fontsize);
+	render.sfont = TTF_OpenFont("./assets/fonts/noto/NotoSansMono-Bold.ttf", fontsize*0.75);
 	if (render.renderer == NULL || render.font == NULL) {
 		Error(SDL_GetError());
 	}
@@ -61,4 +68,13 @@ void freeRender() {
 	SDL_DestroyWindow(render.window);
 	TTF_Quit();
 	SDL_Quit();
+}
+
+void drawText(const char *text, int cx, int cy) {
+	SDL_Texture *texture = createTextTexture(text, 1, Color(255, 255, 255));
+	int w, h;
+	SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+	int x = cx - w / 2;
+	int y = cy - h / 2;
+	SDL_RenderCopy(render.renderer, texture, NULL, &Rect(x, y, w, h));
 }
