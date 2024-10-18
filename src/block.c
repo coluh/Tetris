@@ -46,6 +46,7 @@ static int blockColor[BLOCK_NUM][3] = {
 	{0, 0, 255},
 	{255, 127, 0},
 };
+static int blockColorG[3] = {127, 127, 127};
 const int *getBlockColor(int btype) { return blockColor[btype]; }
 
 // block type; rotate type; block index; x y offset
@@ -192,7 +193,7 @@ BlockType popBlock(BlockBag *bag) {
 void drawBlock(BlockType b, const SDL_Rect *rect) {
 	if (b == BLOCK_NE)
 		return;
-	const int *c = blockColor[b];
+	const int *c = b < BLOCK_NUM ? blockColor[b] : blockColorG;
 	SDL_Renderer *r = getRenderer();
 	SDL_SetRenderDrawColor(r, c[0], c[1], c[2], 255);
 	SDL_RenderFillRect(r, rect);

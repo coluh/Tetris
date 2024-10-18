@@ -25,6 +25,8 @@ void hold(Map *map);
 void lock(Map *map);
 // return lines cleared
 int checkLine(Map *map);
+// add gabbage lines
+void addLines(Map *map, int lines);
 // no blocks empty
 int perfectClear(Map *map);
 // place a new block on the map

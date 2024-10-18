@@ -252,8 +252,6 @@ int checkLine(Map *map) {
 	int lines = 0;
 	for (int y = 0; y < fieldHeight; y++) {
 		bool full = true;
-		/*if (y < 5)*/
-			/*Debug("\tLine %2d: %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d", y, blockAt(map, 0, y), blockAt(map, 1, y), blockAt(map, 2, y), blockAt(map, 3, y), blockAt(map, 4, y), blockAt(map, 5, y), blockAt(map, 6, y), blockAt(map, 7, y), blockAt(map, 8, y), blockAt(map, 9, y));*/
 		for (int x = 0; x < fieldWidth; x++) {
 			if (blockAt(map, x, y) == BLOCK_NE) {
 				full = false;
@@ -271,6 +269,22 @@ int checkLine(Map *map) {
 		}
 	}
 	return lines;
+}
+
+void addLines(Map *map, int lines) {
+	for (int iii = 0; iii < lines; iii++) {
+		for (int j = fieldHeight-1; j >= 1; j--) {
+			for (int i = 0; i < fieldWidth; i++) {
+				setBlockAt(map, i, j, blockAt(map, i, j-1));
+			}
+		}
+		for (int i = 0; i < fieldWidth; i++) {
+			setBlockAt(map, i, 0, BLOCK_NE);
+		}
+		for (int i = 1; i < fieldWidth; i++) {
+			setBlockAt(map, i, 0, BLOCK_G);
+		}
+	}
 }
 
 int perfectClear(Map *map) {

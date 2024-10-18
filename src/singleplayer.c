@@ -10,21 +10,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-static bool running;
 
 void singlePlayer() {
+	bool running;
 
 	Player *p = newPlayer(1);
-	const char *kn[] = {
-		"", "Left", "Right", "Down", "Drop",
-		"RotateR", "RotateC", "Hold", "Pause",
-	};
-	ArrayInt keymap[OPT_NUM];
-	for (int i = OPT_LEFT; i <= OPT_PAUSE; i++) {
-		const ArrayInt p = getConfigArray("KeyMap2", kn[i]);
-		ArrayIntCopy(&keymap[i], &p);
-	}
-	playerSetKeys(p, keymap);
+	playerSetKeys(p, 1);
 
 	uint32_t last = SDL_GetTicks();
 	uint32_t current;

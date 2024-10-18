@@ -5,6 +5,7 @@
 #include "block.h"
 
 #include "singleplayer.h"
+#include "doubleplayer.h"
 #include "settings.h"
 
 #include <signal.h>
@@ -21,6 +22,7 @@ int main() {
 
 	Menu *start = new_Menu(1400, 1000);
 	addMenuEntry(start, "Single Player", singlePlayer);
+	addMenuEntry(start, "Two Player", doubleplayer);
 	addMenuEntry(start, "Settings", settingsPage);
 	addMenuEntry(start, "Exit", stopMenu_ptr);
 	startMenu(start);

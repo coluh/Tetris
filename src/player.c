@@ -3,6 +3,7 @@
 #include "common/utils.h"
 #include "map.h"
 #include "render.h"
+#include "config/config.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +18,7 @@ struct Player {
 		int points;
 		int combo;
 	} score;
+	int linesCleared;
 	bool over; // died
 
 	// keymaps
@@ -33,10 +35,16 @@ Player *newPlayer(int id) {
 	return p;
 }
 
-void playerSetKeys(Player *p, ArrayInt keymap[OPT_NUM]) {
-	for (int i = OPT_EMPTY; i < OPT_NUM; i++) {
-		p->keymap[i].data = keymap[i].data;
-		p->keymap[i].length = keymap[i].length;
+void playerSetKeys(Player *p, int id) {
+	Assert(id == 1 || id == 2, "Only two keymap");
+	const char * kconfig = id == 1 ? "KeyMap1" : "KeyMap2";
+	const char *kn[] = {
+		"", "Left", "Right", "Down", "Drop",
+		"RotateR", "RotateC", "Hold", "Pause",
+	};
+	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
+		const ArrayInt a = getConfigArray(kconfig, kn[i]);
+		ArrayIntCopy(&p->keymap[i], &a);
 	}
 }
 
@@ -46,6 +54,7 @@ void playerSetMap(Player *p, Map *map) {
 	}
 	p->map = map;
 }
+Map *playerGetMap(Player *p) { return p->map; }
 void playerGetScore(Player *p, int *lines, int *level, int *points) {
 	if (lines) {
 		*lines = p->score.lines;
@@ -57,12 +66,22 @@ void playerGetScore(Player *p, int *lines, int *level, int *points) {
 		*points = p->score.points;
 	}
 }
+
+int playerGetLinesCleared(Player *p) {
+	return p->linesCleared;
+}
+
+void playerSetLinesCleared(Player *p, int linesCleared) {
+	p->linesCleared = linesCleared;
+}
+
 bool playerOver(Player *p) {
 	return p->over;
 }
 
-static void checkLineWithScore(Player *p) {
+static void checkLineWrapper(Player *p) {
 	int line = checkLine(p->map);
+	p->linesCleared = line;
 	if (line == 0) {
 		p->score.combo = 0;
 		return;
@@ -103,7 +122,7 @@ static void playerOperate(Player *p, int opt) {
 		break;
 	case OPT_DROP:
 		drop(p->map);
-		checkLineWithScore(p);
+		checkLineWrapper(p);
 		playerForward(p);
 		break;
 	case OPT_ROTATER:
@@ -139,7 +158,7 @@ void playerForward(Player *p) {
 	if (hasFallingBlock(p->map)) {
 		if (move(p->map, 0, -1) != 0) {
 			lock(p->map);
-			checkLineWithScore(p);
+			checkLineWrapper(p);
 			playerForward(p);
 			return;
 		}
@@ -153,7 +172,7 @@ void playerForward(Player *p) {
 			// Tetris Guideline asked for this
 			if (move(p->map, 0, -1) != 0) {
 				lock(p->map);
-				checkLineWithScore(p);
+				checkLineWrapper(p);
 				playerForward(p);
 				return;
 			}

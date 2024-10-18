@@ -20,8 +20,11 @@ typedef struct Player Player;
 Player *newPlayer(int id);
 // re-set the map
 void playerSetMap(Player *p, Map *map);
-void playerSetKeys(Player *p, ArrayInt keymap[OPT_NUM]);
+Map *playerGetMap(Player *p);
+void playerSetKeys(Player *p, int id);
 void playerGetScore(Player *p, int *lines, int *level, int *points);
+int playerGetLinesCleared(Player *p);
+void playerSetLinesCleared(Player *p, int linesCleared);
 bool playerOver(Player *p);
 
 void playerDraw(Player *p);

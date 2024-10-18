@@ -14,6 +14,7 @@
 #define BLOCK_J	5
 #define BLOCK_L	6
 #define BLOCK_NUM 7
+#define BLOCK_G 7
 
 // in clockwise direction
 #define ROTATE_0 0
