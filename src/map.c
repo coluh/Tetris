@@ -252,14 +252,18 @@ int checkLine(Map *map) {
 	int lines = 0;
 	for (int y = 0; y < fieldHeight; y++) {
 		bool full = true;
+		bool hasgabbage = false;
 		for (int x = 0; x < fieldWidth; x++) {
 			if (blockAt(map, x, y) == BLOCK_NE) {
 				full = false;
 				break;
 			}
+			if (blockAt(map, x, y) == BLOCK_G)
+				hasgabbage = true;
 		}
 		if (full) {
-			lines++;
+			if (!hasgabbage)
+				lines++;
 			for (int j = y; j < fieldHeight-1; j++) {
 				for(int i = 0; i < fieldWidth; i++) {
 					setBlockAt(map, i, j, blockAt(map, i, j+1));

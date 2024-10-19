@@ -2,6 +2,7 @@
 #include "config/config.h"
 #include "common/utils.h"
 #include "common/hashmap.h"
+#include "common/intmap.h"
 #include "common/arraylist.h"
 
 #include <signal.h>
@@ -13,8 +14,8 @@ void test_arraylist();
 
 int main() {
 	signal(SIGSEGV, segv_handler);
-	loadConfig("./config");
-	ArrayInt p = getConfigArray("Layout", "FontColorActive");
+	loadConfig("./config/game.cfg");
+	ArrayInt p = getConfigArray("Color", "MenuColor");
 	Debug("Array: %d %d %d %d", p.data[0], p.data[1], p.data[2], p.data[3]);
 	test_map();
 	test_arraylist();
@@ -55,5 +56,13 @@ void test_map() {
 	insertHashMap(map, "coffee", (int []){5});
 	Debug("cat: %d\tdog: %d\tcoffee: %d", *(int*)findHashMap(map, "cat"), *(int*)findHashMap(map, "dog"), *(int*)findHashMap(map, "coffee"));
 
-	;
+	IntMap *imap = newIntMap();
+	intmapSet(imap, 3, 5);
+	intmapSet(imap, 444, -7);
+	intmapSet(imap, 3, 6);
+	OptionInt a = intmapGet(imap, 3);
+	Debug("intmap 3: %d, 444: %d", a.data, intmapGet(imap, 444).data);
+	OptionInt b = intmapGet(imap, 6);
+	if (!b.exist)
+		Debug("imap 6: not exist");
 }

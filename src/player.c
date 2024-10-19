@@ -22,7 +22,6 @@ struct Player {
 	bool over; // died
 
 	// keymaps
-	/*int keys[OPT_NUM];*/
 	ArrayInt keymap[OPT_NUM];
 };
 
