@@ -1,3 +1,4 @@
+#include "player.h"
 #include "render.h"
 #include "config/config.h"
 #include "map.h"
@@ -19,6 +20,7 @@ int main() {
 	initMenuConfig();
 	initBlockConfig();
 	initMapConfig();
+	initPlayerConfig();
 
 	Menu *start = new_Menu(1400, 1000);
 	addMenuEntry(start, "Single Player", singlePlayer);

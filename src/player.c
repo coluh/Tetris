@@ -4,9 +4,14 @@
 #include "map.h"
 #include "render.h"
 #include "config/config.h"
+
+#include <SDL2/SDL_timer.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <SDL2/SDL.h>
 
 struct Player {
 	int id;
@@ -21,9 +26,17 @@ struct Player {
 	int linesCleared;
 	bool over; // died
 
+	uint32_t locktime;
+
 	// keymaps
 	ArrayInt keymap[OPT_NUM];
 };
+
+static uint32_t LockDelay;
+
+void initPlayerConfig() {
+	LockDelay = getConfigInt("Rule", "LockDelay");
+}
 
 Player *newPlayer(int id) {
 	Player *p = calloc(1, sizeof(struct Player));
@@ -31,6 +44,7 @@ Player *newPlayer(int id) {
 	p->map = newMap(NULL);
 	p->bag = newBlockBag();
 	p->score.level = 3;
+	p->locktime = 0;
 	return p;
 }
 
@@ -101,6 +115,10 @@ static void checkLineWrapper(Player *p) {
 	}
 }
 
+void updatePlayerLocktime(Player *p) {
+	p->locktime = SDL_GetTicks();
+}
+
 static void playerOperate(Player *p, int opt) {
 	if (!hasFallingBlock(p->map)) {
 		if (opt == OPT_PAUSE) {
@@ -109,12 +127,17 @@ static void playerOperate(Player *p, int opt) {
 		return;
 		// make sure there is a falling block before move
 	}
+	int r;
 	switch (opt) {
 	case OPT_LEFT:
-		move(p->map, -1, 0);
+		r = move(p->map, -1, 0);
+		if (r == 0)
+			updatePlayerLocktime(p);
 		break;
 	case OPT_RIGHT:
-		move(p->map, 1, 0);
+		r = move(p->map, 1, 0);
+		if (r == 0)
+			updatePlayerLocktime(p);
 		break;
 	case OPT_SOFT:
 		move(p->map, 0, -1);
@@ -125,10 +148,14 @@ static void playerOperate(Player *p, int opt) {
 		playerForward(p);
 		break;
 	case OPT_ROTATER:
-		rotate(p->map, 3);
+		r = rotate(p->map, 3);
+		if (r == 0)
+			updatePlayerLocktime(p);
 		break;
 	case OPT_ROTATEC:
-		rotate(p->map, 1);
+		r = rotate(p->map, 1);
+		if (r == 0)
+			updatePlayerLocktime(p);
 		break;
 	case OPT_HOLD:
 		if (!hasHold(p->map)) {
@@ -137,6 +164,7 @@ static void playerOperate(Player *p, int opt) {
 		} else {
 			hold(p->map);
 		}
+		p->locktime = 0;
 		break;
 	case OPT_PAUSE:
 		Debug("Paused");
@@ -153,14 +181,29 @@ void playerHandleKey(Player *p, int key) {
 	}
 }
 
+static void playerLock(Player *p) {
+	lock(p->map);
+	checkLineWrapper(p);
+	playerForward(p);
+	p->locktime = 0;
+}
+
+static void playerDown(Player *p) {
+	if (move(p->map, 0, -1) != 0) {
+		if (p->locktime == 0)
+			p->locktime = SDL_GetTicks();
+		else {
+			uint32_t current = SDL_GetTicks();
+			if (current - p->locktime >= LockDelay) {
+				playerLock(p);
+			}
+		}
+	}
+}
+
 void playerForward(Player *p) {
 	if (hasFallingBlock(p->map)) {
-		if (move(p->map, 0, -1) != 0) {
-			lock(p->map);
-			checkLineWrapper(p);
-			playerForward(p);
-			return;
-		}
+		playerDown(p);
 	} else {
 		int r = putBlock(p->map, popBlock(p->bag));
 		if (r != 0) {
@@ -169,12 +212,7 @@ void playerForward(Player *p) {
 		} else {
 			// immediately move one step
 			// Tetris Guideline asked for this
-			if (move(p->map, 0, -1) != 0) {
-				lock(p->map);
-				checkLineWrapper(p);
-				playerForward(p);
-				return;
-			}
+			playerDown(p);
 		}
 	}
 }

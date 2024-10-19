@@ -8,7 +8,7 @@
 - [x] Score Module
 - [x] SRS
 - [ ] T-Spins
-- [ ] Lock Down Delay
+- [x] Lock Down Delay
 - [ ] Background Music
 - [ ] Logo
 - [ ] More Game Modes
@@ -17,5 +17,5 @@
 - [x] Config Module
 - [x] Move(drop, kick) Visual Effects
 - [ ] Sound Effects
-- [ ] DoublePlayer
+- [x] DoublePlayer
 - [ ] Web

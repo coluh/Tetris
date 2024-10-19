@@ -17,6 +17,8 @@
 
 typedef struct Player Player;
 
+void initPlayerConfig();
+
 Player *newPlayer(int id);
 // re-set the map
 void playerSetMap(Player *p, Map *map);
@@ -26,6 +28,7 @@ void playerGetScore(Player *p, int *lines, int *level, int *points);
 int playerGetLinesCleared(Player *p);
 void playerSetLinesCleared(Player *p, int linesCleared);
 bool playerOver(Player *p);
+void updatePlayerLocktime(Player *p);
 
 void playerDraw(Player *p);
 

@@ -215,7 +215,6 @@ int rotate(Map *map, int times) {
 	return 1;
 }
 
-// TODO: MISS A RULE
 void hold(Map *map) {
 	if (map->usedHold) return;
 	if (map->hold == BLOCK_NE) {

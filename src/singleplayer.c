@@ -2,7 +2,6 @@
 #include "common/utils.h"
 #include "player.h"
 #include "render.h"
-#include "config/config.h"
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
