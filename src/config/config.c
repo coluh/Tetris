@@ -93,11 +93,11 @@ static ConfigModule *findModule(const char *name) {
 const char *getConfigString(const char *module, const char *key) {
 	return tableFind(findModule(module)->data, key);
 }
-const int getConfigInt(const char *module, const char *key) {
+int getConfigInt(const char *module, const char *key) {
 	return toInt(tableFind(findModule(module)->data, key));
 }
 
-const ArrayInt getConfigArray(const char *module, const char *key) {
+ArrayInt getConfigArray(const char *module, const char *key) {
 	static int t[MAX_ARRAY_LEN + 1];
 
 	const char *v = tableFind(findModule(module)->data, key);

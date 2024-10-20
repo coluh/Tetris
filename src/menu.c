@@ -216,6 +216,7 @@ void freeMenu(Menu *m) {
 	free(m);
 }
 
+// TODO: FIX THIS
 void stopMenu_ptr() {
 	running = false;
 }

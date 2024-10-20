@@ -20,6 +20,8 @@ void startAnimation(SDL_Renderer *r) {
 	};
 	static struct mBlock *pool;
 	static int poolsize;
+	static int passed = 0;
+	passed++;
 
 	int ww, wh;
 	SDL_GetWindowSize(getWindow(), &ww, &wh);
@@ -57,6 +59,14 @@ void startAnimation(SDL_Renderer *r) {
 			this->b = getrand(0, BLOCK_NUM);
 			this->r = getrand(0, ROTATE_NUM);
 		}
+	}
+	if (passed == 3) {
+		passed = 0;
+		pool[getrand(0, poolsize)].r = getrand(0, ROTATE_NUM);
+		pool[getrand(0, poolsize)].r = getrand(0, ROTATE_NUM);
+		pool[getrand(0, poolsize)].r = getrand(0, ROTATE_NUM);
+		pool[getrand(0, poolsize)].r = getrand(0, ROTATE_NUM);
+		pool[getrand(0, poolsize)].r = getrand(0, ROTATE_NUM);
 	}
 
 	// draw part
