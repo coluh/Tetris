@@ -2,12 +2,14 @@
 #include "common/utils.h"
 #include "player.h"
 #include "render.h"
+#include "menu.h"
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_timer.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 
 void singlePlayer() {
@@ -57,4 +59,11 @@ void singlePlayer() {
 	int lines, points;
 	playerGetScore(p, &lines, NULL, &points);
 	Debug("Lines: " CSI_YELLOW "%d" CSI_END "\tPoints: " CSI_YELLOW "%d" CSI_END, lines, points);
+	freePlayer(p);
+
+	char linebuf[16];
+	char pointsbuf[24];
+	sprintf(linebuf, "Line:\t%-4d", lines);
+	sprintf(pointsbuf, "Points:\t%-8d", points);
+
 }

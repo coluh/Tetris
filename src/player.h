@@ -20,6 +20,7 @@ typedef struct Player Player;
 void initPlayerConfig();
 
 Player *newPlayer(int id);
+void freePlayer(Player *p);
 // re-set the map
 void playerSetMap(Player *p, Map *map);
 Map *playerGetMap(Player *p);

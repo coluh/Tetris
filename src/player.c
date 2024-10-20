@@ -48,6 +48,12 @@ Player *newPlayer(int id) {
 	return p;
 }
 
+void freePlayer(Player *p) {
+	freeMap(p->map);
+	free(p->bag);
+	free(p);
+}
+
 void playerSetKeys(Player *p, int id) {
 	Assert(id == 1 || id == 2, "Only two keymap");
 	const char * kconfig = id == 1 ? "KeyMap1" : "KeyMap2";
