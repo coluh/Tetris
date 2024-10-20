@@ -2,8 +2,9 @@
 #include "render.h"
 #include "config/config.h"
 #include "map.h"
-#include "menu.h"
 #include "block.h"
+#include "menu.h"
+#include "strings.h"
 
 #include "singleplayer.h"
 #include "doubleplayer.h"
@@ -21,12 +22,13 @@ int main() {
 	initBlockConfig();
 	initMapConfig();
 	initPlayerConfig();
+	initStringsConfig();
 
 	Menu *start = new_Menu(1400, 1000);
-	addMenuEntry(start, "Single Player", singlePlayer);
-	addMenuEntry(start, "Two Player", doubleplayer);
-	addMenuEntry(start, "Settings", settingsPage);
-	addMenuEntry(start, "Exit", stopMenu_ptr);
+	addMenuEntry(start, getString("single_player", 1), singlePlayer);
+	addMenuEntry(start, getString("double_player", 1), doubleplayer);
+	addMenuEntry(start, getString("settings", 1), settingsPage);
+	addMenuEntry(start, getString("exit", 1), stopMenu_ptr);
 	startMenu(start, 1);
 
 	// menu exited

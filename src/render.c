@@ -54,8 +54,8 @@ void initRender() {
 		windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
 	if (render.window == NULL) Error(SDL_GetError());
 	render.renderer = SDL_CreateRenderer(render.window, -1, 0);
-	render.font = TTF_OpenFont("./assets/fonts/noto/NotoSansMono-Bold.ttf", fontsize);
-	render.sfont = TTF_OpenFont("./assets/fonts/noto/NotoSansMono-Bold.ttf", fontsize*0.75);
+	render.font = TTF_OpenFont("./assets/NotoSansSC-Bold.ttf", fontsize);
+	render.sfont = TTF_OpenFont("./assets/NotoSansSC-Bold.ttf", fontsize*0.75);
 	if (render.renderer == NULL || render.font == NULL) {
 		Error(SDL_GetError());
 	}
