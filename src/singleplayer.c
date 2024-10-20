@@ -14,7 +14,7 @@ void singlePlayer() {
 	bool running;
 
 	Player *p = newPlayer(1);
-	playerSetKeys(p, 1);
+	playerSetKeys(p, 2);
 
 	uint32_t last = SDL_GetTicks();
 	uint32_t current;
