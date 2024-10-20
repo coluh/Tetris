@@ -4,6 +4,22 @@
 #include <string.h>
 #include <time.h>
 
+int getrand(int min, int max) {
+	static int seed = 0;
+	if (!seed) {
+		seed = time(0) + clock();
+		srand(seed);
+	}
+	return min + rand() % (max - min);
+}
+
+float getrandf(float min, float max, float acc) {
+	float k = 1.0 / acc;
+	int r = rand() % (int)((max - min) * k);
+	r += min * k;
+	return (float)r * acc;
+}
+
 void shuffle(int *array, int n) {
 	if (n <= 1)
 		return;

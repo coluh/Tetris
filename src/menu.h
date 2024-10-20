@@ -8,7 +8,9 @@ void initMenuConfig();
 
 Menu *new_Menu(int width, int height);
 void addMenuEntry(Menu *m, const char *string, void (*func)(void));
-void startMenu(Menu *m);
+
+void startMenu(Menu *m, int poll);
+
 void freeMenu(Menu *m);
 
 void stopMenu_ptr();

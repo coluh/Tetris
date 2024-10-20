@@ -27,7 +27,7 @@ int main() {
 	addMenuEntry(start, "Two Player", doubleplayer);
 	addMenuEntry(start, "Settings", settingsPage);
 	addMenuEntry(start, "Exit", stopMenu_ptr);
-	startMenu(start);
+	startMenu(start, 1);
 
 	// menu exited
 	freeMenu(start);

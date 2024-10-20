@@ -3,7 +3,10 @@
 #include "common/utils.h"
 #include "config/config.h"
 
+#include "animes.h"
+
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_hints.h>
 #include <SDL2/SDL_ttf.h>
 
 #include <SDL2/SDL_events.h>
@@ -12,6 +15,7 @@
 #include <SDL2/SDL_video.h>
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -79,8 +83,8 @@ void addMenuEntry(Menu *m, const char *string, void (*func)(void)) {
 	MenuEntry *this = &m->list[m->list_len];
 	this->string = string;
 	this->func = func;
-	this->text_inactive = createTextTexture(this->string, 0, fontColorInactive);
-	this->text_active = createTextTexture(this->string, 0, fontColorActive);
+	this->text_inactive = createTextTexture(this->string, 1, fontColorInactive);
+	this->text_active = createTextTexture(this->string, 1, fontColorActive);
 	SDL_QueryTexture(this->text_active, NULL, NULL, &this->text_w, &this->text_h);
 	Debug("text_w: %d, text_h: %d", this->text_w, this->text_h);
 	this->active = false;
@@ -157,27 +161,50 @@ static void drawMenu(Menu *m) {
 }
 
 static bool running;
-void startMenu(Menu *m) {
+void startMenu(Menu *m, int poll) {
+
 	assignLocations(m);
 	running = true;
 	SDL_Event event;
+
 	while (running) {
+		if (!poll) {
+			SDL_RenderClear(getRenderer());
+			startAnimation(getRenderer());
+			drawMenu(m);
+			SDL_RenderPresent(getRenderer());
 
-		SDL_RenderClear(getRenderer());
-		drawMenu(m);
-		SDL_RenderPresent(getRenderer());
-
-		SDL_WaitEvent(&event);
-		if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN &&
-				((event.key.keysym.sym == SDLK_BACKSPACE) || (event.key.keysym.sym == SDLK_ESCAPE)))) {
-			running = false;
+			SDL_WaitEvent(&event);
+			if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN &&
+						((event.key.keysym.sym == SDLK_BACKSPACE) || (event.key.keysym.sym == SDLK_ESCAPE)))) {
+				running = false;
+			}
+			if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN) {
+				int mx, my;
+				SDL_GetMouseState(&mx, &my);
+				updateMenuStatus(m, mx, my, event.type);
+			}
+		} else {
+			uint32_t start = SDL_GetTicks();
+			while (SDL_PollEvent(&event)) {
+				if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN &&
+							((event.key.keysym.sym == SDLK_BACKSPACE) || (event.key.keysym.sym == SDLK_ESCAPE)))) {
+					running = false;
+				}
+				if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN) {
+					int mx, my;
+					SDL_GetMouseState(&mx, &my);
+					updateMenuStatus(m, mx, my, event.type);
+				}
+			}
+			SDL_RenderClear(getRenderer());
+			startAnimation(getRenderer());
+			drawMenu(m);
+			SDL_RenderPresent(getRenderer());
+			uint32_t end = SDL_GetTicks();
+			if (end - start < 16)
+				SDL_Delay(16 - (end - start));
 		}
-		if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN) {
-			int mx, my;
-			SDL_GetMouseState(&mx, &my);
-			updateMenuStatus(m, mx, my, event.type);
-		}
-
 	}
 }
 

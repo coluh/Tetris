@@ -15,6 +15,8 @@
 #define CSI_WHITE	"\x1B[1;37m"
 #define CSI_END		"\x1B[0m"
  
+int getrand(int min, int max);
+float getrandf(float min, float max, float acc);
 void shuffle(int *array, int n);
 int toInt(const char *string);
 

@@ -13,7 +13,7 @@
 - [ ] Logo
 - [ ] More Game Modes
 
-- [ ] Start Menu Background Animation
+- [x] Start Menu Background Animation
 - [x] Config Module
 - [x] Move(drop, kick) Visual Effects
 - [ ] Sound Effects
