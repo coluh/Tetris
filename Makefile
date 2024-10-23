@@ -1,6 +1,6 @@
 
 CFLAGS = -lSDL2 -lSDL2_ttf -lm
-# CFLAGS += -Werror -Wall
+CFLAGS += -Werror -Wall
 CFLAGS += -g -ggdb -rdynamic
 
 sources := $(shell find src/ -name "*.c" | grep -v "test_")

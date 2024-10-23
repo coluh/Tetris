@@ -56,11 +56,11 @@ void freePlayer(Player *p) {
 
 void playerSetKeys(Player *p, int id) {
 	Assert(id == 1 || id == 2, "Only two keymap");
-	const char * kconfig = id == 1 ? "KeyMap1" : "KeyMap2";
-	const char *kn[] = {
-		"", "Left", "Right", "Down", "Drop",
-		"RotateR", "RotateC", "Hold", "Pause",
-	};
+	/*const char * kconfig = id == 1 ? "KeyMap1" : "KeyMap2";*/
+	/*const char *kn[] = {*/
+		/*"", "Left", "Right", "Down", "Drop",*/
+		/*"RotateR", "RotateC", "Hold", "Pause",*/
+	/*};*/
 	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
 		// const ArrayInt a = getConfigArray(kconfig, kn[i]);
 		// ArrayIntCopy(&p->keymap[i], &a);

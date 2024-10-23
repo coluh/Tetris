@@ -170,6 +170,7 @@ const BlockType *listBag(BlockBag *bag) {
 	for (int i = 0; i < BLOCK_NUM; i++)
 		if (bag->later[i] != BLOCK_NE)
 			return &blocks[i + BLOCK_NUM];
+	return NULL;
 }
 
 BlockType popBlock(BlockBag *bag) {

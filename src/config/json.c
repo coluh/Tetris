@@ -282,6 +282,7 @@ jsonVal *fgetValue(FILE *fp) {
 		free(a);
 		return n;
 	}
+	return NULL;
 }
 
 jsonObj *parseJson(const char *path) {
@@ -351,7 +352,6 @@ static void printValue(FILE *fp, jsonVal *val, int indent) {
 
 static void printObject(FILE *fp, jsonObj *obj, int indent) {
 	fprintf(fp, "{\n");
-	int n;
 	for (jsonPair *p = obj->pairs; p != NULL; p = p->next) {
 		for (int ii = 0; ii < indent + 1; ii++)
 			fprintf(fp, "\t");
