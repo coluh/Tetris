@@ -1,0 +1,83 @@
+{
+	"keymap": [
+		{
+			"Left": "Left",
+			"Right": "Right",
+			"Down": "Down",
+			"Drop": "Space",
+			"RotateR": "Z",
+			"RotateC": "X",
+			"Hold": [ "LShift", "C" ],
+			"Pause": "P",
+		},
+		{
+			"Left": "H",
+			"Right": "L",
+			"Down": "J",
+			"Drop": "K",
+			"RotateR": "I",
+			"RotateC": "O",
+			"Hold": "Tab",
+			"Pause": "P",
+		},
+	],
+	"layout": {
+		"window": {
+			"width": 2100,
+			"height": 1200,
+		},
+		"padding": {
+			"h": 20,
+			"v": 5,
+		},
+		"margin": {
+			"h": 10,
+			"v": 5,
+		},
+		"font": {
+			"path": "./assets/NotoSansSC-Bold.ttf",
+			"size": 48,
+		},
+		"fieldMargin": 20,
+	},
+	"color": {
+		"font": {
+			"inactive": [ 255, 255, 255, 255 ],
+			"active": [ 0, 255, 0, 255 ],
+		},
+		"entry": {
+			"inactive": [ 0, 0, 0, 0 ],
+			"active": [ 0, 0, 0, 127 ],
+		},
+		"menu": [ 40, 120, 255, 63 ],
+		"background": [ 0, 0, 31, 255 ],
+	},
+	"strings": {
+		"en": {
+			"single": "Single Player",
+			"double": "Double Player",
+			"setting": "Settings",
+			"exit": "Exit",
+		},
+		"zh": {
+			"single": "单人模式",
+			"double": "双人模式",
+			"setting": "设置",
+			"exit": "退出游戏",
+		},
+	},
+	"rule": {
+		"field": {
+			"width": 10,
+			"height": 40,
+			"visible": 20,
+		},
+		"blockStart": {
+			"x": 5,
+			"y": 21,
+		},
+		"lockDelay": 500,
+		"maxMove": 15,
+		"countdown": 3,
+	},
+}

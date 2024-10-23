@@ -1,23 +1,25 @@
 
 #include "config/config.h"
 #include "common/utils.h"
-#include "common/hashmap.h"
-#include "common/intmap.h"
 #include "common/arraylist.h"
+#include "config/json.h"
 
 #include <signal.h>
+#include <stdio.h>
 #include <string.h>
 #include "common/errhandle.h"
 
-void test_map();
 void test_arraylist();
+void tests();
 
 int main() {
+
+	tests();
+
 	signal(SIGSEGV, segv_handler);
 	loadConfig("./config/game.cfg");
 	ArrayInt p = getConfigArray("Color", "MenuColor");
 	Debug("Array: %d %d %d %d", p.data[0], p.data[1], p.data[2], p.data[3]);
-	test_map();
 	test_arraylist();
 	return 0;
 }
@@ -49,20 +51,20 @@ void test_arraylist() {
 	freeList(list);
 }
 
-void test_map() {
-	HashMap *map = newHashMap(sizeof(int));
-	insertHashMap(map, "cat", (int []){3});
-	insertHashMap(map, "dog", (int []){4});
-	insertHashMap(map, "coffee", (int []){5});
-	Debug("cat: %d\tdog: %d\tcoffee: %d", *(int*)findHashMap(map, "cat"), *(int*)findHashMap(map, "dog"), *(int*)findHashMap(map, "coffee"));
 
-	IntMap *imap = newIntMap();
-	intmapSet(imap, 3, 5);
-	intmapSet(imap, 444, -7);
-	intmapSet(imap, 3, 6);
-	OptionInt a = intmapGet(imap, 3);
-	Debug("intmap 3: %d, 444: %d", a.data, intmapGet(imap, 444).data);
-	OptionInt b = intmapGet(imap, 6);
-	if (!b.exist)
-		Debug("imap 6: not exist");
+jsonObj *parseJson(const char *path);
+
+void tests() {
+
+	jsonObj *json = parseJson("./config/config.json");
+
+	printf("Window Width: %d\n", jsonGetInt(json, (const char *[]){ "layout", "window", "width" }, 3));
+	printf("Font path: %s\n", jsonGetStr(json, (const char *[]){ "layout", "font", "path" }, 3));
+	printf("Mode name: %s\n", jsonGetStr(json, (const char *[]){ "strings", "zh", "double" }, 3));
+
+	int c[4];
+	jsonGetArrI(json, (const char *[]){ "color", "font", "inactive" }, 3, c);
+	printf("FontInact: (%d, %d, %d, %d)\n", c[0], c[1], c[2], c[3]);
+
+	outputJson(json, "");
 }
