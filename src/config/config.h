@@ -1,18 +1,18 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "parser.h"
+#include "json.h"
 #include "../common/utils.h"
 
-#include <strings.h>
-
-typedef struct ConfigModule ConfigModule;
-void loadConfig(const char *config);
+void loadConfig(const char *path);
 void freeConfig();
-const char *getConfigString(const char *module, const char *key);
-int getConfigInt(const char *module, const char *key);
-ArrayInt getConfigArray(const char *module, const char *key);
 
-// TODO BETTER CONFIG, like string array
+#define KeyChain (const char *[])
+
+int getConfigInt(const char *keychain[], int keycount);
+const char *getConfigString(const char *keychain[], int keycount);
+const ArrayInt getConfigArrayInt(const char *keychain[], int keycount);
+const ArrayString getConfigArrayString(const char *keychain[], int keycount);
+
 
 #endif // __CONFIG_H__

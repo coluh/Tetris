@@ -27,7 +27,7 @@ void startAnimation(SDL_Renderer *r) {
 	SDL_GetWindowSize(getWindow(), &ww, &wh);
 	if (init) {
 		init = 0;
-		const int *p = getConfigArray("Color", "BackgroundColor").data;
+		const int *p = getConfigArrayInt(KeyChain { "color", "background" }, 2).data;
 		bgC.r = p[0];
 		bgC.g = p[1];
 		bgC.b = p[2];

@@ -7,9 +7,9 @@
 
 static const char ***table;
 static const char *strings[] = {
-	"single_player",
-	"double_player",
-	"settings",
+	"single",
+	"double",
+	"setting",
 	"exit",
 };
 
@@ -18,8 +18,8 @@ void initStringsConfig() {
 	table[0] = calloc(4, sizeof(char *));
 	table[1] = calloc(4, sizeof(char *));
 	for (int i = 0; i < 4; i++) {
-		table[0][i] = copyString(getConfigString("String/en", strings[i]));
-		table[1][i] = copyString(getConfigString("String/zh", strings[i]));
+		table[0][i] = copyString(getConfigString(KeyChain { "strings", "en", strings[i] }, 3));
+		table[1][i] = copyString(getConfigString(KeyChain { "strings", "zh", strings[i] }, 3));
 	}
 }
 

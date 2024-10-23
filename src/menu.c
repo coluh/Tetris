@@ -33,15 +33,15 @@ static int marginV;
 extern int fontsize;
 
 void initMenuConfig() {
-	fontColorInactive = ColorArray(getConfigArray("Color", "FontColorInactive").data);
-	fontColorActive = ColorArray(getConfigArray("Color", "FontColorActive").data);
-	entryColorInactive = ColorArrayA(getConfigArray("Color", "EntryColorInactive").data);
-	entryColorActive = ColorArrayA(getConfigArray("Color", "EntryColorActive").data);
-	menuColor = ColorArrayA(getConfigArray("Color", "MenuColor").data);
-	paddingH = getConfigInt("Layout", "PaddingH");
-	paddingV = getConfigInt("Layout", "PaddingV");
-	marginH = getConfigInt("Layout", "MarginH");
-	marginV = getConfigInt("Layout", "MarginV");
+	fontColorInactive = ColorArray(getConfigArrayInt(KeyChain { "color", "font", "inactive" }, 3).data);
+	fontColorActive = ColorArray(getConfigArrayInt(KeyChain { "color", "font", "active" }, 3).data);
+	entryColorInactive = ColorArrayA(getConfigArrayInt(KeyChain { "color", "entry", "inactive" }, 3).data);
+	entryColorActive = ColorArrayA(getConfigArrayInt(KeyChain { "color", "entry", "active" }, 3).data);
+	menuColor = ColorArrayA(getConfigArrayInt(KeyChain { "color", "menu" }, 2).data);
+	paddingH = getConfigInt(KeyChain { "layout", "padding", "h" }, 3);
+	paddingV = getConfigInt(KeyChain { "layout", "padding", "v" }, 3);
+	marginH = getConfigInt(KeyChain { "layout", "margin", "h" }, 3);
+	marginV = getConfigInt(KeyChain { "layout", "margin", "v" }, 3);
 }
 
 struct MenuEntry {

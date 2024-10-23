@@ -16,7 +16,7 @@
 int main() {
 
 	signal(SIGSEGV, segv_handler);
-	loadConfig("./config/game.cfg");
+	loadConfig("./config/config.json");
 	initRender();
 	initMenuConfig();
 	initBlockConfig();
@@ -25,9 +25,9 @@ int main() {
 	initStringsConfig();
 
 	Menu *start = new_Menu(1400, 1000);
-	addMenuEntry(start, getString("single_player", 1), singlePlayer);
-	addMenuEntry(start, getString("double_player", 1), doubleplayer);
-	addMenuEntry(start, getString("settings", 1), settingsPage);
+	addMenuEntry(start, getString("single", 1), singlePlayer);
+	addMenuEntry(start, getString("double", 1), doubleplayer);
+	addMenuEntry(start, getString("setting", 1), settingsPage);
 	addMenuEntry(start, getString("exit", 1), stopMenu_ptr);
 	startMenu(start, 1);
 

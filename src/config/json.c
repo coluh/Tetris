@@ -4,23 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum jsonType {
-	JSONT_NUL, JSONT_BOO, JSONT_NBR,
-	JSONT_STR, JSONT_ARR, JSONT_OBJ,
-} jsonType;
-
-struct jsonVal {
-	jsonType type;
-	int arrayLen; // if needed;
-	union {
-		int bool;
-		double number;
-		char *string;
-		struct jsonVal *array;
-		jsonObj *object;
-	};
-};
-
 typedef struct jsonPair {
 	char *key;
 	jsonVal *value;
@@ -43,6 +26,7 @@ static void addPair(jsonObj *obj, char *key, jsonVal *value) {
 void freeJson(jsonObj *json);
 
 static void freeValue(jsonVal *v) {
+	if (v == NULL) return;
 	if (v->type == JSONT_STR) {
 		free(v->string);
 	} else if (v->type == JSONT_OBJ) {
@@ -51,8 +35,8 @@ static void freeValue(jsonVal *v) {
 		for (int i = 0; i < v->arrayLen; i++) {
 			freeValue(&v->array[i]);
 		}
+		free(v->array);
 	}
-	free(v);
 }
 
 void freeJson(jsonObj *json) {
@@ -61,6 +45,7 @@ void freeJson(jsonObj *json) {
 		jsonPair *next = p->next;
 		free(p->key);
 		freeValue(p->value);
+		free(p->value);
 		free(p);
 		p = next;
 	}
@@ -76,6 +61,7 @@ static jsonValArray *newValueArray() {
 	jsonValArray *a = calloc(1, sizeof(jsonValArray));
 	a->cap = 8;
 	a->arr = calloc(a->cap, sizeof(jsonVal));
+	a->len = 0;
 	return a;
 }
 
@@ -203,7 +189,7 @@ jsonVal *newValue(jsonType type, void *data) {
 	case JSONT_NUL:
 		break;
 	case JSONT_BOO:
-		v->bool = *(int*)data;
+		v->boolean = *(int*)data;
 		break;
 	case JSONT_NBR:
 		v->number = *(double*)data;
@@ -258,8 +244,8 @@ jsonVal *fgetValue(FILE *fp) {
 	case JSONT_BOO:
 		literal = fgetLiteral(fp);
 		if (strcmp(literal, "true") == 0 || strcmp(literal, "false") == 0) {
-			int bool = literal[0] == 't' ? 1 : 0;
-			return newValue(JSONT_BOO, &bool);
+			int boolean = literal[0] == 't' ? 1 : 0;
+			return newValue(JSONT_BOO, &boolean);
 		} else if (strcmp(literal, "null") == 0) {
 			return newValue(JSONT_NUL, NULL);
 		}
@@ -307,32 +293,6 @@ jsonObj *parseJson(const char *path) {
 	}
 
 	return fgetObject(fp);
-}
-
-jsonVal *jsonGetVal(jsonObj *json, const char *keychain[], int keycount) {
-	jsonObj *current = json;
-	jsonVal *t = NULL;
-	for (int i = 0; i < keycount; i++) {
-		const char *k = keychain[i];
-		jsonPair *p = current->pairs;
-		for (; p != NULL; p = p->next) {
-			if (strcmp(p->key, k) == 0) {
-				t = p->value;
-				break;
-			}
-		}
-		if (p == NULL) {
-			fprintf(stderr, "jsonGet %s: key not found\n", keychain[i]);
-			return NULL;
-		}
-		if (i < keycount - 1) {
-			if (t->type != JSONT_OBJ) {
-				fprintf(stderr, "jsonGet %s: Not an object\n", keychain[i]);
-			}
-			current = t->object;
-		}
-	}
-	return t;
 }
 
 static void printObject(FILE *fp, jsonObj *obj, int indent);
@@ -412,28 +372,37 @@ void outputJson(jsonObj *json, const char *path) {
 	fprintf(fp, "\n");
 }
 
-int jsonGetInt(jsonObj *json, const char *keychain[], int keycount) {
-	return (int)jsonGetVal(json, keychain, keycount)->number;
-}
-
-double jsonGetNbr(jsonObj *json, const char *keychain[], int keycount) {
-	return jsonGetVal(json, keychain, keycount)->number;
-}
-
-const char *jsonGetStr(jsonObj *json, const char *keychain[], int keycount) {
-	return jsonGetVal(json, keychain, keycount)->string;
-}
-
-int jsonGetArrI(jsonObj *json, const char *keychain[], int keycount, int p[]) {
-	jsonVal *v = jsonGetVal(json, keychain, keycount);
-	if (v->type != JSONT_ARR) {
-		fprintf(stderr, "jsonGet: Not an array");
-		return -1;
+const jsonVal *jsonGetVal(const jsonObj *json, const char *keychain[], int keycount) {
+	const jsonObj *current = json;
+	jsonVal *t = NULL;
+	for (int i = 0; i < keycount; i++) {
+		const char *k = keychain[i];
+		jsonPair *p = current->pairs;
+		for (; p != NULL; p = p->next) {
+			if (strcmp(p->key, k) == 0) {
+				t = p->value;
+				break;
+			}
+		}
+		if (p == NULL) {
+			fprintf(stderr, "jsonGet %s: key not found\n", keychain[i]);
+			return NULL;
+		}
+		if (i < keycount - 1) {
+			if (t->type != JSONT_OBJ) {
+				fprintf(stderr, "jsonGet %s: Not an object\n", keychain[i]);
+			}
+			current = t->object;
+		}
 	}
-	for (int i = 0; i < v->arrayLen; i++) {
-		const jsonVal *va = &v->array[i];
-		p[i] = (int)va->number;
-	}
-	return v->arrayLen;
+	return t;
 }
+
+const jsonVal *jsonGetArr(const jsonObj *json, const char *keychain[], int keycount, int *count) {
+	const jsonVal *v = jsonGetVal(json, keychain, keycount);
+	if (count)
+		*count = v->arrayLen;
+	return v->array;
+}
+
 

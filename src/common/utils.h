@@ -25,6 +25,11 @@ typedef struct ArrayInt {
 	int length;
 } ArrayInt;
 
+typedef struct ArrayString {
+	char **data;
+	int length;
+} ArrayString;
+
 void ArrayIntCopy(ArrayInt *dst, const ArrayInt *src);
 
 #define newArrayInt(p, len) (ArrayInt){ .data=p, .length=len };

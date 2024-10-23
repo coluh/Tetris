@@ -35,7 +35,7 @@ struct Player {
 static uint32_t LockDelay;
 
 void initPlayerConfig() {
-	LockDelay = getConfigInt("Rule", "LockDelay");
+	LockDelay = getConfigInt(KeyChain { "rule", "lockDelay" }, 2);
 }
 
 Player *newPlayer(int id) {
@@ -62,8 +62,8 @@ void playerSetKeys(Player *p, int id) {
 		"RotateR", "RotateC", "Hold", "Pause",
 	};
 	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
-		const ArrayInt a = getConfigArray(kconfig, kn[i]);
-		ArrayIntCopy(&p->keymap[i], &a);
+		// const ArrayInt a = getConfigArray(kconfig, kn[i]);
+		// ArrayIntCopy(&p->keymap[i], &a);
 	}
 }
 

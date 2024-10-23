@@ -43,19 +43,20 @@ SDL_Texture *createTextTexture(const char *string, int small, SDL_Color color) {
 }
 
 void initRender() {
-	const int *p = getConfigArray("Color", "BackgroundColor").data;
+	const int *p = getConfigArrayInt(KeyChain { "color", "background" }, 2).data;
 	backgroundColor = Color(p[0], p[1], p[2]);
-	windowWidth = getConfigInt("Layout", "WindowWidth");
-	windowHeight = getConfigInt("Layout", "WindowHeight");
-	fontsize = getConfigInt("Layout", "FontSize");
+	windowWidth = getConfigInt(KeyChain { "layout", "window", "width" }, 3);
+	windowHeight = getConfigInt(KeyChain { "layout", "window", "height" }, 3);
+	fontsize = getConfigInt(KeyChain { "layout", "font", "size"}, 3);
+	const char *fontpath = getConfigString(KeyChain { "layout", "font", "path" }, 3);
 	SDL_Init(SDL_INIT_VIDEO);
 	TTF_Init();
 	render.window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
 	if (render.window == NULL) Error(SDL_GetError());
 	render.renderer = SDL_CreateRenderer(render.window, -1, 0);
-	render.font = TTF_OpenFont("./assets/NotoSansSC-Bold.ttf", fontsize);
-	render.sfont = TTF_OpenFont("./assets/NotoSansSC-Bold.ttf", fontsize*0.75);
+	render.font = TTF_OpenFont(fontpath, fontsize);
+	render.sfont = TTF_OpenFont(fontpath, fontsize*0.75);
 	if (render.renderer == NULL || render.font == NULL) {
 		Error(SDL_GetError());
 	}

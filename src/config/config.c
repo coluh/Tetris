@@ -1,120 +1,51 @@
-#include "../common/utils.h"
 #include "config.h"
-#include "parser.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dirent.h>
-#include <unistd.h>
+#include "json.h"
+#include "../common/utils.h"
 
-#define MAX_ARRAY_LEN 10
+static jsonObj *config;
 
-struct ConfigModule {
-	char *name;
-	Table data;
-	struct ConfigModule *next;
-};
-
-static char *configFile;
-static ConfigModule *configs;
-
-static void addModule(char *name, Table data);
-
-void loadConfig(const char *config) {
-	FILE *fp = fopen(config, "r");
-	Assert(fp != NULL, "config file not found");
-
-	if (configFile)
-		free(configFile);
-	configFile = copyString(config);
-
-	char *k, *v;
-	int line;
-	while ((line = checkFormat(fp, &k, &v)) == PARSER_LINE_SKIP)
-		;
-	while (!feof(fp)) {
-		Assert(line == PARSER_LINE_NAME, "format error in config file: name should be first");
-		char *name = copyString(k);
-
-		Table data = newTable();
-		while ((line = checkFormat(fp, &k, &v)) != PARSER_LINE_NAME) {
-			if (line == PARSER_LINE_SKIP) {
-				if (feof(fp)) {
-					break;
-				}
-				continue;
-			}
-			Assert(line != PARSER_LINE_UNKNOWN, "format error in config file: unknown line");
-			addEntry(&data, k, v);
-		}
-		addModule(name, data);
-	}
-
-	fclose(fp);
+void loadConfig(const char *path) {
+	config = parseJson(path);
 }
 
-static void freeModule(ConfigModule *m) {
-	if (m == NULL)
-		return;
-	freeModule(m->next);
-
-	free(m->name);
-	freeTable(m->data);
-	free(m);
-}
 void freeConfig() {
-	freeModule(configs);
-	free(configFile);
+	freeJson(config);
 }
 
-static void addModule(char *name, Table data) {
-	ConfigModule **p = &configs;
-	for (; *p != NULL; p = &(*p)->next)
-		;
-	*p = calloc(1, sizeof(struct ConfigModule));
-	ConfigModule *this = *p;
-
-	this->name = name;
-	this->data = data;
+int getConfigInt(const char *keychain[], int keycount) {
+	const jsonVal *v = jsonGetVal(config, keychain, keycount);
+	return (int)v->number;
 }
 
-static ConfigModule *findModule(const char *name) {
-	for (ConfigModule *p = configs; p != NULL; p = p->next) {
-		if (strcmp(p->name, name) == 0) {
-			return p;
-		}
+const char *getConfigString(const char *keychain[], int keycount) {
+	const jsonVal *v = jsonGetVal(config, keychain, keycount);
+	return v->string;
+}
+
+const ArrayInt getConfigArrayInt(const char *keychain[], int keycount) {
+	static int buf[32];
+	const jsonVal *v = jsonGetVal(config, keychain, keycount);
+	Assert(v->type == JSONT_ARR, "Not an array");
+	for (int i = 0; i < v->arrayLen; i++) {
+		buf[i] = (int)v->array[i].number;
 	}
-	Error("ConfigModule Not Found");
-	Debug("%s", name);
-	return NULL;
+	return newArrayInt(buf, v->arrayLen);
 }
 
-const char *getConfigString(const char *module, const char *key) {
-	return tableFind(findModule(module)->data, key);
-}
-int getConfigInt(const char *module, const char *key) {
-	return toInt(tableFind(findModule(module)->data, key));
-}
-
-ArrayInt getConfigArray(const char *module, const char *key) {
-	static int t[MAX_ARRAY_LEN + 1];
-
-	const char *v = tableFind(findModule(module)->data, key);
-	char *s = copyString(v);
-	char *word = &s[0];
-
-	int index = 0;
-	for (int i = 0; s[i] != '\0'; i++) {
-		if (s[i] == ',') {
-			s[i] = '\0';
-			t[index++] = atoi(word);
-			word = &s[i+1];
-		}
+const ArrayString getConfigArrayString(const char *keychain[], int keycount) {
+	static char *buf[32];
+	const jsonVal *v = jsonGetVal(config, keychain, keycount);
+	Assert(v->type == JSONT_ARR, "Not an array");
+	for (int i = 0; i < v->arrayLen; i++) {
+		buf[i] = v->array[i].string;
 	}
-	if(*word != '\0')
-		t[index++] = atoi(word);
-	free(s);
-	return newArrayInt(t, index);
+	return (ArrayString) {
+		.data = (char**)buf,
+		.length = v->arrayLen,
+	};
 }
+
+
+
 
