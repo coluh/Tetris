@@ -1,3 +1,4 @@
+#include "animes.h"
 #include "player.h"
 #include "render.h"
 #include "config/config.h"
@@ -24,11 +25,12 @@ int main() {
 	initPlayerConfig();
 	initStringsConfig();
 
-	Menu *start = new_Menu(1400, 1000);
-	addMenuEntry(start, getString("single", 1), singlePlayer);
-	addMenuEntry(start, getString("double", 1), doubleplayer);
-	addMenuEntry(start, getString("setting", 1), settingsPage);
-	addMenuEntry(start, getString("exit", 1), stopMenu_ptr);
+	Menu *start = new_Menu("start");
+	addMenuTitle(start, makeStartpageTitle(getRenderer()));
+	addMenuEntry(start, getString("single", 0), singlePlayer);
+	addMenuEntry(start, getString("double", 0), doubleplayer);
+	addMenuEntry(start, getString("setting", 0), settingsPage);
+	addMenuEntry(start, getString("exit", 0), stopMenu_ptr);
 	startMenu(start, 1);
 
 	// menu exited

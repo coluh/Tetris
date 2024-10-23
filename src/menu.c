@@ -7,6 +7,8 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_hints.h>
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_ttf.h>
 
 #include <SDL2/SDL_events.h>
@@ -26,6 +28,7 @@ static SDL_Color entryColorInactive;
 static SDL_Color entryColorActive;
 static SDL_Color menuColor;
 
+static int menuPadding;
 static int paddingH;
 static int paddingV;
 static int marginH;
@@ -42,6 +45,7 @@ void initMenuConfig() {
 	paddingV = getConfigInt(KeyChain { "layout", "padding", "v" }, 3);
 	marginH = getConfigInt(KeyChain { "layout", "margin", "h" }, 3);
 	marginV = getConfigInt(KeyChain { "layout", "margin", "v" }, 3);
+	menuPadding = getConfigInt(KeyChain { "layout", "menuPadding" }, 2);
 }
 
 struct MenuEntry {
@@ -57,19 +61,17 @@ struct MenuEntry {
 };
 
 struct Menu {
+	char *label;
 	int x, y, w, h;
+	SDL_Texture *title;
+	SDL_Rect title_r;
 	MenuEntry *list;
 	int list_len;
 };
 
-extern int windowWidth;
-extern int windowHeight;
-Menu *new_Menu(int width, int height) {
+Menu *new_Menu(const char *label) {
 	Menu *m = calloc(1, sizeof(struct Menu));
-	m->x = (windowWidth - width) / 2;
-	m->y = (windowHeight - height) / 2;
-	m->w = width;
-	m->h = height;
+	m->label = copyString(label);
 	return m;
 }
 
@@ -90,36 +92,59 @@ void addMenuEntry(Menu *m, const char *string, void (*func)(void)) {
 	m->list_len++;
 }
 
+void addMenuTitle(Menu *m, SDL_Texture *title) {
+	m->title = title;
+}
+
 // assign locations for menu and each menu entry
 static void assignLocations(Menu *m) {
-	int total_height = m->list_len * (fontsize + paddingV * 2 + marginV * 2) + 2 * paddingV;
-	if (total_height > m->h) Warning("Menu Entrys overflow in y");
-	int starty = (m->h - total_height) / 2 + paddingV + marginV;
+
+	int win_w, win_h;
+	SDL_GetWindowSize(getWindow(), &win_w, &win_h);
+
+	int title_w, title_h;
+	SDL_QueryTexture(m->title, NULL, NULL, &title_w, &title_h);
+	m->title_r.x = (win_w - title_w) / 2;
+	m->title_r.w = title_w;
+	m->title_r.h = title_h;
+
+	int max_text_w = 0;
+	for (int i = 0; i < m->list_len; i++) {
+		int w, h;
+		SDL_QueryTexture(m->list[i].text_active, NULL, NULL, &w, &h);
+		m->list[i].text_w = w;
+		m->list[i].text_h = h;
+		if (w > max_text_w)
+			max_text_w = w;
+	}
+	int max_w = max_text_w+paddingH*2+marginH*2 > title_w ? max_text_w+paddingH*2+marginH*2 : title_w;
+
+	m->h = m->list_len * (fontsize+paddingV*2+marginV*2) + 2*menuPadding + title_h;
+	m->w = max_w+menuPadding*2;
+	m->x = (win_w - m->w) / 2;
+	m->y = (win_h - m->h) / 2;
+	if (m->w > win_w) Warning("Menu overflow in x");
+	if (m->w > win_w) Warning("Menu overflow in y");
+	m->title_r.y = m->y + menuPadding;
 
 	/* +-----------------------+
+	 * |     I AM THE TITLE    |
 	 * |      +----------+     |
 	 * |      |  Hello!  |     |
 	 * |      +----------+     |
 	 * |      +----------+     |
-	 * |      |          |     |
+	 * |      |   Exit   |     |
 	 * |      +----------+     |
 	 * +-----------------------+
 	 * */
+
+	int start_y = m->y + menuPadding + title_h + marginV;
 	for (int i = 0; i < m->list_len; i++) {
-		 m->list[i].h = m->list[i].text_h + 2 * paddingV;
-		 m->list[i].y = starty + i * (fontsize + 2 * paddingV + 2 * marginV);
-	}
-	int max_width = 0;
-	for (int i = 0; i < m->list_len; i++)
-		if (m->list[i].text_w > max_width)
-			max_width = m->list[i].text_w;
-	max_width += paddingH * 2;
-	int total_width = max_width + marginH * 2 + paddingH * 2;
-	if (total_width > m->w) Warning("Menu Entrys overflow in x");
-	int startx = (windowWidth - max_width) / 2;
-	for (int i = 0; i < m->list_len; i++) {
-		 m->list[i].x = startx;
-		 m->list[i].w = max_width;
+		struct MenuEntry *this = &m->list[i];
+		this->w = max_text_w + paddingH * 2;
+		this->h = fontsize + paddingV * 2;
+		this->x = (win_w - this->w) / 2;
+		this->y = start_y + i * (fontsize+paddingV*2+marginV*2);
 	}
 }
 
@@ -140,17 +165,16 @@ static void updateMenuStatus(Menu *m, int mousex, int mousey, int type) {
 
 static void drawMenu(Menu *m) {
 	SDL_Renderer *r = getRenderer();
-	SDL_Rect rect = {m->x, m->y, m->w, m->h};
 	SDL_SetRenderDrawColor(r, ColorUnpack(menuColor));
-	SDL_RenderFillRect(r, &rect);
+	SDL_RenderFillRect(r, &(SDL_Rect){m->x, m->y, m->w, m->h});
+	SDL_RenderCopy(r, m->title, NULL, &m->title_r);
 	for (int i = 0; i < m->list_len; i++) {
 		MenuEntry *this = &m->list[i];
 		if (this->active)
 			SDL_SetRenderDrawColor(r, ColorUnpack(entryColorActive));
 		else
 			SDL_SetRenderDrawColor(r, ColorUnpack(entryColorInactive));
-		rect = (SDL_Rect) {this->x, this->y, this->w, this->h};
-		SDL_RenderFillRect(r, &rect);
+		SDL_RenderFillRect(r, &(SDL_Rect){this->x, this->y, this->w, this->h});
 		SDL_Rect dst = {this->x + paddingH, this->y + paddingV, this->text_w, this->text_h};
 		if (this->active)
 			SDL_RenderCopy(r, this->text_active, NULL, &dst);
@@ -169,7 +193,6 @@ void startMenu(Menu *m, int poll) {
 	while (running) {
 		if (!poll) {
 			SDL_RenderClear(getRenderer());
-			startAnimation(getRenderer());
 			drawMenu(m);
 			SDL_RenderPresent(getRenderer());
 
@@ -195,9 +218,13 @@ void startMenu(Menu *m, int poll) {
 					SDL_GetMouseState(&mx, &my);
 					updateMenuStatus(m, mx, my, event.type);
 				}
+				if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
+					assignLocations(m);
+				}
 			}
 			SDL_RenderClear(getRenderer());
-			startAnimation(getRenderer());
+			if (strcmp(m->label, "start") == 0)
+				startAnimation(getRenderer());
 			drawMenu(m);
 			SDL_RenderPresent(getRenderer());
 			uint32_t end = SDL_GetTicks();
@@ -205,6 +232,7 @@ void startMenu(Menu *m, int poll) {
 				SDL_Delay(16 - (end - start));
 		}
 	}
+	running = true;
 }
 
 void freeMenu(Menu *m) {
@@ -213,6 +241,7 @@ void freeMenu(Menu *m) {
 		SDL_DestroyTexture(m->list[i].text_inactive);
 	}
 	free(m->list);
+	free(m->label);
 	free(m);
 }
 

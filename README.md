@@ -10,7 +10,7 @@
 - [ ] T-Spins
 - [x] Lock Down Delay
 - [ ] Background Music
-- [ ] Logo
+- [x] Logo
 - [ ] More Game Modes
 
 - [x] Start Menu Background Animation

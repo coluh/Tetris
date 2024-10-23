@@ -4,7 +4,9 @@
 #include "config/config.h"
 #include "render.h"
 
+#include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_video.h>
 #include <stdlib.h>
 
@@ -82,3 +84,37 @@ void startAnimation(SDL_Renderer *r) {
 		}
 	}
 }
+
+SDL_Texture *makeStartpageTitle(SDL_Renderer *r) {
+	static SDL_Texture *texture = NULL;
+
+	if (texture)
+		return texture;
+
+	int ww;
+	SDL_GetWindowSize(getWindow(), &ww, NULL);
+	int a = ww * 0.07;
+	texture = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 3*a, 2*a);
+	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+
+	SDL_SetRenderTarget(r, texture);
+	SDL_SetRenderDrawColor(r, 0, 0, 0, 0);
+	SDL_RenderClear(r);
+
+	drawBlock(BLOCK_T, &(SDL_Rect){ 0, 0, a, a });
+	drawBlock(BLOCK_T, &(SDL_Rect){ a, 0, a, a });
+	drawBlock(BLOCK_T, &(SDL_Rect){ a*2, 0, a, a });
+	drawBlock(BLOCK_T, &(SDL_Rect){ a, a, a, a });
+	SDL_SetRenderDrawColor(r, rgba(0, 255, 0, 191));
+	for (int x = a*1; x < a*2.5; x++) {
+		for (int b = a*3; b < a*5; b++) {
+			int y = b - 2 * x;
+			SDL_RenderDrawPoint(r, x, y);
+		}
+	}
+
+	SDL_SetRenderTarget(r, NULL);
+
+	return texture;
+}
+

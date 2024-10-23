@@ -71,6 +71,14 @@ char *copyString(const char *other) {
 	return n;
 }
 
+const char *concat(const char *m, const char *n) {
+	static char buf[64];
+	memset(buf, 0, 64);
+	strcpy(buf, m);
+	strcat(buf, n);
+	return buf;
+}
+
 void printError(const char *msg, const char *file, int line, const char *function) {
 	fprintf(stderr, "%s: line %d[%s]: \x1B[1;37;41mError:\x1B[0m %s\n", file, line, function, msg);
 	fflush(stderr);

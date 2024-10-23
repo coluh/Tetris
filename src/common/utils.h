@@ -40,6 +40,7 @@ void ArrayIntCopy(ArrayInt *dst, const ArrayInt *src);
 		&& ((my) >= (r).y) && ((my) < (r).y+(r).h))
 
 char *copyString(const char *other);
+const char *concat(const char *m, const char *n);
 
 /**
  * Error Handling

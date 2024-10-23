@@ -38,6 +38,7 @@
 			"path": "./assets/NotoSansSC-Bold.ttf",
 			"size": 48,
 		},
+		"menuPadding": 40,
 		"fieldMargin": 20,
 	},
 	"color": {

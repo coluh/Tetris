@@ -9,6 +9,8 @@
 #define ColorArray(p) ((SDL_Color){p[0] & 0xFF, p[1] & 0xFF, p[2] & 0xFF, 255})
 #define ColorArrayA(p) ((SDL_Color){p[0] & 0xFF, p[1] & 0xFF, p[2] & 0xFF, p[3] & 0xFF})
 #define ColorUnpack(sdlc) sdlc.r, sdlc.g, sdlc.b, sdlc.a
+#define rgb(r, g, b) r,g,b,255
+#define rgba(r, g, b, a) r,g,b,a
 
 void initRender();
 void freeRender();
