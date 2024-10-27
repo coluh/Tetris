@@ -13,6 +13,8 @@ typedef struct OptionInt {
 IntMap *newIntMap();
 OptionInt getIntMap(IntMap *m, int key);
 void insertIntMap(IntMap *m, int key, int value);
+int getIntMapSize(IntMap *m);
+const int *traverseIntMap(IntMap *m, int *n);
 void freeIntMap(IntMap *m);
 
 #endif // __INT_MAP__

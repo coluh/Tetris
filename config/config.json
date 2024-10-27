@@ -6,8 +6,8 @@
 			"Down": "Down",
 			"Drop": "Space",
 			"RotateR": "Z",
-			"RotateC": "X",
-			"Hold": [ "LShift", "C" ],
+			"RotateC": [ "X", "Up" ],
+			"Hold": [ "Left Shift", "C" ],
 			"Pause": "P",
 		},
 		{
@@ -36,7 +36,7 @@
 		},
 		"font": {
 			"path": "./assets/NotoSansSC-Bold.ttf",
-			"size": 48,
+			"size": 64,
 		},
 		"menuPadding": 40,
 		"fieldMargin": 20,
@@ -54,6 +54,7 @@
 		"background": [ 0, 0, 31, 255 ],
 	},
 	"strings": {
+		"lang": "zh",
 		"en": {
 			"single": "Single Player",
 			"double": "Double Player",

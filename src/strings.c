@@ -12,8 +12,13 @@ static const char *strings[] = {
 	"setting",
 	"exit",
 };
+static int lang;
 
 void initStringsConfig() {
+	const char *language = getConfigString(KeyChain { "strings", "lang" }, 2);
+	if (strcmp(language, "zh") == 0) {
+		lang = 1;
+	}
 	table = calloc(2, sizeof(char **));
 	table[0] = calloc(4, sizeof(char *));
 	table[1] = calloc(4, sizeof(char *));
@@ -23,8 +28,7 @@ void initStringsConfig() {
 	}
 }
 
-const char *getString(const char *string, int lang) {
-	Assert(lang == 0 || lang == 1, "No other language");
+const char *getString(const char *string) {
 	for (int i = 0; i < 4; i++) {
 		if (strcmp(strings[i], string) == 0) {
 			return table[lang][i];

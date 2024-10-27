@@ -18,6 +18,26 @@ IntMap *newIntMap() {
 	return (IntMap *)calloc(1, sizeof(struct IntMap));
 }
 
+int getIntMapSize(IntMap *m) {
+	int n = 0;
+	for (IntMapNode *p = m->head; p != NULL; p = p->next) {
+		n++;
+	}
+	return n;
+}
+
+const int *traverseIntMap(IntMap *m, int *n) {
+	static int keys[256];
+	int index = 0;
+	for (IntMapNode *p = m->head; p != NULL; p = p->next) {
+		keys[index] = p->k;
+		index++;
+	}
+	if (n)
+		*n = index;
+	return keys;
+}
+
 #define Some(value) ((OptionInt){.data = value, .exist = true})
 #define None() ((OptionInt){.exist = false})
 

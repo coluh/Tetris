@@ -25,7 +25,7 @@ void doubleplayer() {
 	playerSetKeys(p, 1);
 	playerSetMap(p, newMap(&(SDL_Rect){wb, b, wh/2, wh}));
 	Player *q = newPlayer(2);
-	playerSetKeys(q, 2);
+	playerSetKeys(q, 0);
 	playerSetMap(q, newMap(&(SDL_Rect){ww/2+wb, b, wh/2, wh}));
 
 	uint32_t last, current, start, end;

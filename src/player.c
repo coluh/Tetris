@@ -1,10 +1,15 @@
 #include "player.h"
 #include "block.h"
 #include "common/utils.h"
+#include "config/json.h"
 #include "map.h"
 #include "render.h"
 #include "config/config.h"
+#include "common/intmap.h"
 
+
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_timer.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -29,7 +34,7 @@ struct Player {
 	uint32_t locktime;
 
 	// keymaps
-	ArrayInt keymap[OPT_NUM];
+	IntMap *keymap;
 };
 
 static uint32_t LockDelay;
@@ -45,25 +50,39 @@ Player *newPlayer(int id) {
 	p->bag = newBlockBag();
 	p->score.level = 3;
 	p->locktime = 0;
+	p->keymap = newIntMap();
 	return p;
 }
 
 void freePlayer(Player *p) {
 	freeMap(p->map);
+	freeIntMap(p->keymap);
 	free(p->bag);
 	free(p);
 }
 
 void playerSetKeys(Player *p, int id) {
-	Assert(id == 1 || id == 2, "Only two keymap");
-	/*const char * kconfig = id == 1 ? "KeyMap1" : "KeyMap2";*/
-	/*const char *kn[] = {*/
-		/*"", "Left", "Right", "Down", "Drop",*/
-		/*"RotateR", "RotateC", "Hold", "Pause",*/
-	/*};*/
-	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
-		// const ArrayInt a = getConfigArray(kconfig, kn[i]);
-		// ArrayIntCopy(&p->keymap[i], &a);
+	Assert(id == 0 || id == 1, "Only two keymap");
+	const char *kn[] = {
+		"", "Left", "Right", "Down", "Drop",
+		"RotateR", "RotateC", "Hold", "Pause",
+	};
+	const jsonVal *keymaps = jsonGetArr(getConfig(), KeyChain { "keymap" }, 1, NULL);
+	const jsonObj *keymap = keymaps[id].object;
+	for (int i = OPT_LEFT; i <= OPT_PAUSE; i++) {
+		const jsonVal *kv = jsonGetVal(keymap, KeyChain { kn[i] }, 1);
+		if (kv->type == JSONT_ARR) {
+			const jsonVal *keys = kv->array;
+			for (int j = 0; j < kv->arrayLen; j++) {
+				const char *key = keys[j].string;
+				int keyCode = SDL_GetKeyFromName(key);
+				insertIntMap(p->keymap, keyCode, i);
+			}
+		} else {
+			Assert(kv->type == JSONT_STR, "kv->type == JSONT_STR");
+			int keyCode = SDL_GetKeyFromName(kv->string);
+			insertIntMap(p->keymap, keyCode, i);
+		}
 	}
 }
 
@@ -125,10 +144,21 @@ void updatePlayerLocktime(Player *p) {
 	p->locktime = SDL_GetTicks();
 }
 
+void pause() {
+	SDL_Event e;
+	bool waiting = true;
+	while (waiting) {
+		SDL_WaitEvent(&e);
+		if (e.type == SDL_QUIT || e.type == SDL_KEYDOWN) {
+			waiting = false;
+		}
+	}
+}
+
 static void playerOperate(Player *p, int opt) {
 	if (!hasFallingBlock(p->map)) {
 		if (opt == OPT_PAUSE) {
-			Debug("Pause");
+			pause();
 		}
 		return;
 		// make sure there is a falling block before move
@@ -173,17 +203,20 @@ static void playerOperate(Player *p, int opt) {
 		p->locktime = 0;
 		break;
 	case OPT_PAUSE:
-		Debug("Paused");
+		pause();
 		break;
 	}
 }
 
 void playerHandleKey(Player *p, int key) {
-	for (int i = OPT_LEFT; i < OPT_NUM; i++) {
-		const ArrayInt *a = &p->keymap[i];
-		for (int j = 0; j < a->length; j++)
-			if (a->data[j] == key)
-				playerOperate(p, i);
+	int size;
+	const int *keys = traverseIntMap(p->keymap, &size);
+
+	for (int i = 0; i < size; i++) {
+		int keyCode = keys[i];
+		if (keyCode == key) {
+			playerOperate(p, getIntMap(p->keymap, keyCode).data);
+		}
 	}
 }
 

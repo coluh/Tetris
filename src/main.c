@@ -27,10 +27,10 @@ int main() {
 
 	Menu *start = new_Menu("start");
 	addMenuTitle(start, makeStartpageTitle(getRenderer()));
-	addMenuEntry(start, getString("single", 0), singlePlayer);
-	addMenuEntry(start, getString("double", 0), doubleplayer);
-	addMenuEntry(start, getString("setting", 0), settingsPage);
-	addMenuEntry(start, getString("exit", 0), stopMenu_ptr);
+	addMenuEntry(start, getString("single"), singlePlayer);
+	addMenuEntry(start, getString("double"), doubleplayer);
+	addMenuEntry(start, getString("setting"), settingsPage);
+	addMenuEntry(start, getString("exit"), stopMenu_ptr);
 	startMenu(start, 1);
 
 	// menu exited

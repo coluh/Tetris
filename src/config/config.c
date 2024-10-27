@@ -5,6 +5,10 @@
 
 static jsonObj *config;
 
+const jsonObj *getConfig() {
+	return config;
+}
+
 void loadConfig(const char *path) {
 	config = parseJson(path);
 }
