@@ -4,6 +4,7 @@
 void initMusic();
 
 void effectFall();
+void effectRotate();
 
 void freeMusic();
 

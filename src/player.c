@@ -185,14 +185,16 @@ static void playerOperate(Player *p, int opt) {
 		playerForward(p);
 		break;
 	case OPT_ROTATER:
-		r = rotate(p->map, 3);
-		if (r == 0)
+		if (rotate(p->map, 3) == 0) {
+			effectRotate();
 			updatePlayerLocktime(p);
+		}
 		break;
 	case OPT_ROTATEC:
-		r = rotate(p->map, 1);
-		if (r == 0)
+		if (rotate(p->map, 1) == 0) {
+			effectRotate();
 			updatePlayerLocktime(p);
+		}
 		break;
 	case OPT_HOLD:
 		if (!hasHold(p->map)) {
