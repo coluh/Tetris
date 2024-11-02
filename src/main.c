@@ -6,6 +6,7 @@
 #include "block.h"
 #include "menu.h"
 #include "strings.h"
+#include "music.h"
 
 #include "singleplayer.h"
 #include "doubleplayer.h"
@@ -24,6 +25,7 @@ int main() {
 	initMapConfig();
 	initPlayerConfig();
 	initStringsConfig();
+	initMusic();
 
 	Menu *start = new_Menu("start");
 	addMenuTitle(start, makeStartpageTitle(getRenderer()));

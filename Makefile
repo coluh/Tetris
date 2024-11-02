@@ -1,5 +1,5 @@
 
-CFLAGS = -lSDL2 -lSDL2_ttf -lm
+CFLAGS = -lSDL2 -lSDL2_ttf -lSDL2_mixer -lm
 CFLAGS += -Werror -Wall
 CFLAGS += -g -ggdb -rdynamic
 

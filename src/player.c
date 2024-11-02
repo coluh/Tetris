@@ -6,7 +6,7 @@
 #include "render.h"
 #include "config/config.h"
 #include "common/intmap.h"
-
+#include "music.h"
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
@@ -180,6 +180,7 @@ static void playerOperate(Player *p, int opt) {
 		break;
 	case OPT_DROP:
 		drop(p->map);
+		effectFall();
 		checkLineWrapper(p);
 		playerForward(p);
 		break;
