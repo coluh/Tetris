@@ -163,17 +163,20 @@ static void playerOperate(Player *p, int opt) {
 		return;
 		// make sure there is a falling block before move
 	}
-	int r;
 	switch (opt) {
 	case OPT_LEFT:
-		r = move(p->map, -1, 0);
-		if (r == 0)
+		if (move(p->map, -1, 0) == 0) {
 			updatePlayerLocktime(p);
+		} else {
+			shakeMap(p->map, -10, 0, 10);
+		}
 		break;
 	case OPT_RIGHT:
-		r = move(p->map, 1, 0);
-		if (r == 0)
+		if (move(p->map, 1, 0) == 0) {
 			updatePlayerLocktime(p);
+		} else {
+			shakeMap(p->map, 10, 0, 10);
+		}
 		break;
 	case OPT_SOFT:
 		move(p->map, 0, -1);

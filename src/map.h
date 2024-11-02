@@ -37,4 +37,6 @@ void drawMap(Map *m);
 void drawBag(BlockBag *g, Map *m);
 void drawHold(Map *m);
 
+void shakeMap(Map *m, int dx, int dy, int dt);
+
 #endif // __MAP_H__

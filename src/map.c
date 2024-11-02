@@ -27,6 +27,9 @@ struct Map {
 	// Layout
 	SDL_Rect rect;
 	List *dropEffects;
+
+	void (*updateAnime)(struct Map *this, void *cmd);
+	bool animating;
 };
 
 struct DropEffect {
@@ -66,6 +69,8 @@ static void setBlockAt(Map *map, int x, int y, BlockType bt) {
 	map->block[x + y * fieldWidth] = bt;
 }
 
+void updateAnime(struct Map *this, void *cmd);
+
 Map *newMap(SDL_Rect *rect) {
 	Map *m = calloc(1, sizeof(struct Map));
 	m->block = calloc(fieldWidth * fieldHeight, sizeof(BlockType));
@@ -85,6 +90,9 @@ Map *newMap(SDL_Rect *rect) {
 		wh -= 2 * fieldMargin;
 		m->rect = Rect(ww / 3, fieldMargin, wh/2, wh);
 	}
+
+	m->updateAnime = updateAnime;
+
 	return m;
 }
 
@@ -319,6 +327,7 @@ int putBlock(Map *map, BlockType b) {
 static void drawDropEffect(Map *m, struct DropEffect *eff);
 
 void drawMap(Map *m) {
+	m->updateAnime(m, NULL);
 	SDL_Renderer *r = getRenderer();
 	SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
 	SDL_RenderFillRect(r, &m->rect);
@@ -442,5 +451,47 @@ static void drawDropEffect(Map *m, struct DropEffect *eff) {
 		a *= 0.5;
 		SDL_SetRenderDrawColor(r, c[0], c[1], c[2], (int)a);
 		SDL_RenderDrawLine(r, eff->sx - 5, eff->sy - h, eff->sx + 5, eff->sy - h);
+	}
+}
+
+void shakeMap(Map *m, int dx, int dy, int dt) {
+	if (m->animating)
+		return;
+	updateAnime(m, (int []){
+		111, dx, dy, dt
+	});
+	m->animating = true;
+}
+
+void updateAnime(Map *map, void *cmd) {
+	static int mapx, mapy;
+	static int dx, dy, dt;
+	static int t = 0;
+	static int shaking = 0;
+
+	if (cmd != NULL) {
+		int *cmds = cmd;
+		if (cmds[0] == 111) {
+			mapx = map->rect.x;
+			mapy = map->rect.y;
+			dx = cmds[1];
+			dy = cmds[2];
+			dt = cmds[3];
+			shaking = 1;
+		}
+		return;
+	}
+
+	if (shaking) {
+		map->rect.x = mapx + dx - abs(dx - 2 * dx * t / dt);
+		map->rect.y = mapy + dy - abs(dy - 2 * dy * t / dt);
+		t++;
+		if (t >= dt) {
+			t = 0;
+			shaking = 0;
+			map->rect.x = mapx;
+			map->rect.y = mapy;
+			map->animating = false;
+		}
 	}
 }
