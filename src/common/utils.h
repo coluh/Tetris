@@ -20,6 +20,8 @@ float getrandf(float min, float max, float acc);
 void shuffle(int *array, int n);
 int toInt(const char *string);
 
+#define sign(x) ((x)>0?1:-1)
+
 typedef struct ArrayInt {
 	int *data;
 	int length;

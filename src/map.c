@@ -483,8 +483,8 @@ void updateAnime(Map *map, void *cmd) {
 	}
 
 	if (shaking) {
-		map->rect.x = mapx + dx - abs(dx - 2 * dx * t / dt);
-		map->rect.y = mapy + dy - abs(dy - 2 * dy * t / dt);
+		map->rect.x = mapx + dx - sign(dx) * abs(dx - 2 * dx * t / dt);
+		map->rect.y = mapy + dy - sign(dy) * abs(dy - 2 * dy * t / dt);
 		t++;
 		if (t >= dt) {
 			t = 0;
