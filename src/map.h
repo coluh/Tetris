@@ -14,6 +14,7 @@ void freeMap(Map *m);
 
 bool hasFallingBlock(Map *map);
 bool hasHold(Map *map);
+bool reachBottom(Map *map);
 // move in specific way
 int move(Map *map, int dx, int dy);
 void drop(Map *map);
@@ -27,7 +28,7 @@ void lock(Map *map);
 int checkLine(Map *map);
 // add gabbage lines
 void addLines(Map *map, int lines);
-// no blocks empty
+// no blocks
 int perfectClear(Map *map);
 // place a new block on the map
 int putBlock(Map *map, BlockType b);
@@ -36,6 +37,7 @@ int putBlock(Map *map, BlockType b);
 void drawMap(Map *m);
 void drawBag(BlockBag *g, Map *m);
 void drawHold(Map *m);
+void drawLocktime(Map *map, uint32_t locktime);
 
 void shakeMap(Map *m, int dx, int dy, int dt);
 

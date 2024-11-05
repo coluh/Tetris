@@ -1,6 +1,7 @@
 #ifndef TETRIS_PLAYER_H
 #define TETRIS_PLAYER_H
 
+#include <stdint.h>
 #include "map.h"
 #include "common/utils.h"
 
@@ -26,8 +27,10 @@ void playerSetMap(Player *p, Map *map);
 Map *playerGetMap(Player *p);
 void playerSetKeys(Player *p, int id);
 void playerGetScore(Player *p, int *lines, int *level, int *points);
+uint32_t playerGetLocktime(Player *p);
 int playerGetLinesCleared(Player *p);
 void playerSetLinesCleared(Player *p, int linesCleared);
+
 bool playerOver(Player *p);
 void updatePlayerLocktime(Player *p);
 

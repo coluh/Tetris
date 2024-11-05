@@ -9,7 +9,10 @@
 
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 struct FallingBlock {
@@ -146,6 +149,15 @@ int move(Map *map, int dx, int dy) {
 		return 1;
 	}
 	return 0;
+}
+
+bool reachBottom(Map *map) {
+	if (move(map, 0, -1) == 0) {
+		move(map, 0, 1);
+		return false;
+	} else {
+		return true;
+	}
 }
 
 void drop(Map *map) {
@@ -353,8 +365,10 @@ void drawMap(Map *m) {
 			drawBlock(blockAt(m, i, j), &rect);
 		}
 	}
+
 	if (!m->falling)
 		return;
+
 	const int (*shape)[2] = getBlockShape(m->falling->type, m->falling->rotate);
 	// draw shadow
 	FallingBlock t = {
@@ -436,6 +450,17 @@ void drawHold(Map *map) {
 		y *= a;
 		drawBlock(map->hold, &(SDL_Rect){x+rect.x+a/2, y+rect.y+a/2, a, a});
 	}
+}
+
+void drawLocktime(Map *map, uint32_t locktime) {
+	if (locktime == 0)
+		return;
+
+	uint32_t current = SDL_GetTicks();
+	uint32_t past = current - locktime;
+	char buf[8];
+	sprintf(buf, "0.%3dms", past);
+	drawText(buf, map->rect.x + map->rect.w + 2*getFontSize(), map->rect.y+map->rect.h - fieldMargin/2);
 }
 
 // sx sy is center of effect beginning

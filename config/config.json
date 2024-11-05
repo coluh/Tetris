@@ -35,7 +35,7 @@
 			"v": 5,
 		},
 		"font": {
-			"path": "./assets/NotoSansSC-Bold.ttf",
+			"path": "./assets/NotoSansSC-Regular.ttf",
 			"size": 64,
 		},
 		"menuPadding": 40,

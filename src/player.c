@@ -105,6 +105,8 @@ void playerGetScore(Player *p, int *lines, int *level, int *points) {
 	}
 }
 
+uint32_t playerGetLocktime(Player *p) { return p->locktime; }
+
 int playerGetLinesCleared(Player *p) {
 	return p->linesCleared;
 }
@@ -141,6 +143,8 @@ static void checkLineWrapper(Player *p) {
 }
 
 void updatePlayerLocktime(Player *p) {
+	if (!reachBottom(p->map))
+		return;
 	p->locktime = SDL_GetTicks();
 }
 
@@ -251,6 +255,7 @@ void playerForward(Player *p) {
 		playerDown(p);
 	} else {
 		int r = putBlock(p->map, popBlock(p->bag));
+		p->locktime = 0;
 		if (r != 0) {
 			p->over = true;
 			return;
@@ -266,6 +271,7 @@ void playerDraw(Player *p) {
 	drawMap(p->map);
 	drawBag(p->bag, p->map);
 	drawHold(p->map);
+	drawLocktime(p->map, p->locktime);
 	int x, y, w, h;
 	getMapRect(p->map, &x, &y, &w, &h);
 	y += h/2;
