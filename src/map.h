@@ -10,6 +10,8 @@ void initMapConfig();
 
 Map *newMap(SDL_Rect *rect);
 void getMapRect(Map *map, int *x, int *y, int *w, int *h);
+void setMapRect(Map *map, SDL_Rect *rect);
+void mapSetPlayer(Map *map, void *player);
 void freeMap(Map *m);
 
 bool hasFallingBlock(Map *map);
@@ -35,9 +37,9 @@ int putBlock(Map *map, BlockType b);
 
 // These should be removef from here!!
 void drawMap(Map *m);
-void drawBag(BlockBag *g, Map *m);
+void drawBag(Map *m);
 void drawHold(Map *m);
-void drawLocktime(Map *map, uint32_t locktime);
+void drawLocktime(Map *map);
 
 void shakeMap(Map *m, int dx, int dy, int dt);
 

@@ -3,6 +3,7 @@
 #include "common/utils.h"
 #include "common/arraylist.h"
 #include "config/config.h"
+#include "player.h"
 #include "render.h"
 
 #include <SDL2/SDL.h>
@@ -22,6 +23,8 @@ struct FallingBlock {
 	RotateState rotate;
 };
 struct Map {
+	Player *player;
+
 	BlockType *block;
 	FallingBlock *falling;
 	BlockType hold;
@@ -99,6 +102,10 @@ Map *newMap(SDL_Rect *rect) {
 	return m;
 }
 
+void mapSetPlayer(Map *map, void *player) {
+	map->player = player;
+}
+
 void getMapRect(Map *map, int *x, int *y, int *w, int *h) {
 	if (x)
 		*x = map->rect.x;
@@ -108,6 +115,10 @@ void getMapRect(Map *map, int *x, int *y, int *w, int *h) {
 		*w = map->rect.w;
 	if (h)
 		*h = map->rect.h;
+}
+
+void setMapRect(Map *map, SDL_Rect *rect) {
+	map->rect = *rect;
 }
 
 void freeMap(Map *m) {
@@ -402,7 +413,7 @@ void drawMap(Map *m) {
 	}
 }
 
-void drawBag(BlockBag *g, Map *map) {
+void drawBag(Map *map) {
 	SDL_Rect rect;
 	rect.x = map->rect.x + map->rect.w + fieldMargin;
 	rect.y = fieldMargin;
@@ -411,6 +422,8 @@ void drawBag(BlockBag *g, Map *map) {
 	rect.h = rect.w * 3.5;
 	SDL_Renderer *r = getRendererColor(Color(0, 0, 0));
 	SDL_RenderFillRect(r, &rect);
+
+	BlockBag *g = playerGetBlockBag(map->player);
 
 	int a = (float)rect.w / 5;
 	const BlockType *list = listBag(g);
@@ -452,7 +465,8 @@ void drawHold(Map *map) {
 	}
 }
 
-void drawLocktime(Map *map, uint32_t locktime) {
+void drawLocktime(Map *map) {
+	uint32_t locktime = playerGetLocktime(map->player);
 	if (locktime == 0)
 		return;
 
@@ -460,7 +474,7 @@ void drawLocktime(Map *map, uint32_t locktime) {
 	uint32_t past = current - locktime;
 	char buf[8];
 	sprintf(buf, "0.%3dms", past);
-	drawText(buf, map->rect.x + map->rect.w + 2*getFontSize(), map->rect.y+map->rect.h - fieldMargin/2);
+	drawText(buf, map->rect.x + map->rect.w + 2*getFontSize(), map->rect.y+map->rect.h - getFontSize()/2);
 }
 
 // sx sy is center of effect beginning
@@ -480,6 +494,13 @@ static void drawDropEffect(Map *m, struct DropEffect *eff) {
 }
 
 void shakeMap(Map *m, int dx, int dy, int dt) {
+	static Map *map = NULL;
+	if (map == NULL) {
+		map = m;
+	} else {
+		if (map != m)
+			return;
+	}
 	if (m->animating)
 		return;
 	updateAnime(m, (int []){

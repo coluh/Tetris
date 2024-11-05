@@ -10,6 +10,7 @@
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_timer.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,6 +48,7 @@ Player *newPlayer(int id) {
 	Player *p = calloc(1, sizeof(struct Player));
 	p->id = id;
 	p->map = newMap(NULL);
+	mapSetPlayer(p->map, p);
 	p->bag = newBlockBag();
 	p->score.level = 3;
 	p->locktime = 0;
@@ -86,13 +88,10 @@ void playerSetKeys(Player *p, int id) {
 	}
 }
 
-void playerSetMap(Player *p, Map *map) {
-	if (p->map) {
-		freeMap(p->map);
-	}
-	p->map = map;
+void playerMoveMap(Player *p, SDL_Rect *newRect) {
+	setMapRect(p->map, newRect);
 }
-Map *playerGetMap(Player *p) { return p->map; }
+
 void playerGetScore(Player *p, int *lines, int *level, int *points) {
 	if (lines) {
 		*lines = p->score.lines;
@@ -105,7 +104,11 @@ void playerGetScore(Player *p, int *lines, int *level, int *points) {
 	}
 }
 
+BlockBag *playerGetBlockBag(Player *p) { return p->bag; }
+
 uint32_t playerGetLocktime(Player *p) { return p->locktime; }
+
+void *playerGetMap(Player *p) { return p->map; }
 
 int playerGetLinesCleared(Player *p) {
 	return p->linesCleared;
@@ -269,9 +272,9 @@ void playerForward(Player *p) {
 
 void playerDraw(Player *p) {
 	drawMap(p->map);
-	drawBag(p->bag, p->map);
+	drawBag(p->map);
 	drawHold(p->map);
-	drawLocktime(p->map, p->locktime);
+	drawLocktime(p->map);
 	int x, y, w, h;
 	getMapRect(p->map, &x, &y, &w, &h);
 	y += h/2;

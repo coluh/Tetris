@@ -2,8 +2,8 @@
 #define TETRIS_PLAYER_H
 
 #include <stdint.h>
-#include "map.h"
 #include "common/utils.h"
+#include "block.h"
 
 #define OPT_EMPTY	0
 #define OPT_LEFT	1
@@ -22,12 +22,12 @@ void initPlayerConfig();
 
 Player *newPlayer(int id);
 void freePlayer(Player *p);
-// re-set the map
-void playerSetMap(Player *p, Map *map);
-Map *playerGetMap(Player *p);
 void playerSetKeys(Player *p, int id);
+void playerMoveMap(Player *p, SDL_Rect *newRect);
 void playerGetScore(Player *p, int *lines, int *level, int *points);
+BlockBag *playerGetBlockBag(Player *p);
 uint32_t playerGetLocktime(Player *p);
+void *playerGetMap(Player *p);
 int playerGetLinesCleared(Player *p);
 void playerSetLinesCleared(Player *p, int linesCleared);
 
