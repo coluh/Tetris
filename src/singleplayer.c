@@ -31,8 +31,12 @@ void singlePlayer() {
 			if (event.type == SDL_KEYDOWN) {
 				playerHandleKey(p, event.key.keysym.sym);
 			}
+			if (event.type == SDL_KEYUP) {
+				playerHandleKeyUp(p, event.key.keysym.sym);
+			}
 		}
 
+		playerUpdate(p);
 		SDL_RenderClear(getRenderer());
 		playerDraw(p);
 		SDL_RenderPresent(getRenderer());

@@ -463,6 +463,10 @@ void drawHold(Map *map) {
 		y *= a;
 		drawBlock(map->hold, &(SDL_Rect){x+rect.x+a/2, y+rect.y+a/2, a, a});
 	}
+	if (map->usedHold) {
+		SDL_SetRenderDrawColor(r, rgba(0, 0, 0, 127));
+		SDL_RenderFillRect(r, &rect);
+	}
 }
 
 void drawLocktime(Map *map) {

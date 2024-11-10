@@ -21,6 +21,12 @@
 			"Pause": "P",
 		},
 	],
+	"control": {
+		"DAS": 10,
+		"ARR": 2,
+		"DCD": 0,
+		"SARR": 2,
+	},
 	"layout": {
 		"window": {
 			"width": 2100,

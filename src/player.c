@@ -5,7 +5,6 @@
 #include "map.h"
 #include "render.h"
 #include "config/config.h"
-#include "common/intmap.h"
 #include "music.h"
 
 #include <SDL2/SDL_events.h>
@@ -35,13 +34,23 @@ struct Player {
 	uint32_t locktime;
 
 	// keymaps
-	IntMap *keymap;
+	ArrayString keymap[OPT_NUM];
+	uint32_t dasFrame;
+	bool fast;
+	uint32_t arrFrame;
+	uint32_t sarrFrame;
 };
 
 static uint32_t LockDelay;
+static int DAS;
+static int ARR;
+static int SARR;
 
 void initPlayerConfig() {
 	LockDelay = getConfigInt(KeyChain { "rule", "lockDelay" }, 2);
+	DAS = getConfigInt(KeyChain { "control", "DAS" }, 2);
+	ARR = getConfigInt(KeyChain { "control", "ARR" }, 2);
+	SARR = getConfigInt(KeyChain { "control", "SARR" }, 2);
 }
 
 Player *newPlayer(int id) {
@@ -52,13 +61,13 @@ Player *newPlayer(int id) {
 	p->bag = newBlockBag();
 	p->score.level = 3;
 	p->locktime = 0;
-	p->keymap = newIntMap();
 	return p;
 }
 
 void freePlayer(Player *p) {
 	freeMap(p->map);
-	freeIntMap(p->keymap);
+	for (int i = 0; i < OPT_NUM; i++)
+		freeArrayString(p->keymap[i]);
 	free(p->bag);
 	free(p);
 }
@@ -77,19 +86,13 @@ void playerSetKeys(Player *p, int id) {
 			const jsonVal *keys = kv->array;
 			for (int j = 0; j < kv->arrayLen; j++) {
 				const char *key = keys[j].string;
-				int keyCode = SDL_GetKeyFromName(key);
-				insertIntMap(p->keymap, keyCode, i);
+				arrayStringAdd(&p->keymap[i], key);
 			}
 		} else {
 			Assert(kv->type == JSONT_STR, "kv->type == JSONT_STR");
-			int keyCode = SDL_GetKeyFromName(kv->string);
-			insertIntMap(p->keymap, keyCode, i);
+			arrayStringAdd(&p->keymap[i], kv->string);
 		}
 	}
-}
-
-void playerMoveMap(Player *p, SDL_Rect *newRect) {
-	setMapRect(p->map, newRect);
 }
 
 void playerGetScore(Player *p, int *lines, int *level, int *points) {
@@ -162,6 +165,30 @@ void pause() {
 	}
 }
 
+static void left(Player *p) {
+	if (move(p->map, -1, 0) == 0) {
+		updatePlayerLocktime(p);
+	} else {
+		shakeMap(p->map, -10, 0, 10);
+	}
+}
+static void right(Player *p) {
+	if (move(p->map, 1, 0) == 0) {
+		updatePlayerLocktime(p);
+	} else {
+		shakeMap(p->map, 10, 0, 10);
+	}
+}
+static void soft(Player *p) {
+	move(p->map, 0, -1);
+}
+static void hard(Player *p) {
+	drop(p->map);
+	effectFall();
+	checkLineWrapper(p);
+	playerForward(p);
+}
+
 static void playerOperate(Player *p, int opt) {
 	if (!hasFallingBlock(p->map)) {
 		if (opt == OPT_PAUSE) {
@@ -172,27 +199,13 @@ static void playerOperate(Player *p, int opt) {
 	}
 	switch (opt) {
 	case OPT_LEFT:
-		if (move(p->map, -1, 0) == 0) {
-			updatePlayerLocktime(p);
-		} else {
-			shakeMap(p->map, -10, 0, 10);
-		}
 		break;
 	case OPT_RIGHT:
-		if (move(p->map, 1, 0) == 0) {
-			updatePlayerLocktime(p);
-		} else {
-			shakeMap(p->map, 10, 0, 10);
-		}
 		break;
 	case OPT_SOFT:
-		move(p->map, 0, -1);
 		break;
 	case OPT_DROP:
-		drop(p->map);
-		effectFall();
-		checkLineWrapper(p);
-		playerForward(p);
+		hard(p);
 		break;
 	case OPT_ROTATER:
 		if (rotate(p->map, 3) == 0) {
@@ -222,14 +235,74 @@ static void playerOperate(Player *p, int opt) {
 }
 
 void playerHandleKey(Player *p, int key) {
-	int size;
-	const int *keys = traverseIntMap(p->keymap, &size);
-
-	for (int i = 0; i < size; i++) {
-		int keyCode = keys[i];
-		if (keyCode == key) {
-			playerOperate(p, getIntMap(p->keymap, keyCode).data);
+	for (int i = 0; i < OPT_NUM; i++) {
+		for (int j = 0; j < p->keymap[i].length; j++) {
+			if (key == SDL_GetKeyFromName(p->keymap[i].data[j])) {
+				playerOperate(p, i);
+			}
 		}
+	}
+}
+
+void playerHandleKeyUp(Player *p, int key) {
+	for (int i = 0; i < OPT_NUM; i++) {
+		for (int j = 0; j < p->keymap[i].length; j++) {
+			if (key == SDL_GetKeyFromName(p->keymap[i].data[j])) {
+				if (i == OPT_LEFT && p->dasFrame > 0) {
+					left(p);
+				}
+				if (i == OPT_RIGHT && p->dasFrame > 0) {
+					right(p);
+				}
+			}
+		}
+	}
+}
+
+static bool optDown(Player *p, int opt) {
+	const uint8_t *state = SDL_GetKeyboardState(NULL);
+	for (int j = 0; j < p->keymap[opt].length; j++) {
+		if (state[SDL_GetScancodeFromName(p->keymap[opt].data[j])]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void playerUpdate(Player *p) {
+
+	if (optDown(p, OPT_LEFT) || optDown(p, OPT_RIGHT)) {
+		p->dasFrame++;
+		if (p->dasFrame == DAS) {
+			p->fast = true;
+			p->arrFrame = 0;
+		}
+	} else {
+		p->dasFrame = 0;
+		p->fast = false;
+	}
+
+	if (p->fast) {
+		if (optDown(p, OPT_LEFT) || optDown(p, OPT_RIGHT)) {
+			p->arrFrame++;
+		}
+		if (p->arrFrame == ARR) {
+			if (optDown(p, OPT_LEFT))
+				left(p);
+			if (optDown(p, OPT_RIGHT))
+				right(p);
+			p->arrFrame = 0;
+		}
+	}
+
+	if (optDown(p, OPT_SOFT)) {
+		p->sarrFrame++;
+		if (p->sarrFrame == SARR) {
+			soft(p);
+			p->sarrFrame = 0;
+		}
+	} else {
+		p->sarrFrame = 0;
 	}
 }
 

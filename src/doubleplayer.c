@@ -23,10 +23,10 @@ void doubleplayer() {
 
 	Player *p = newPlayer(1);
 	playerSetKeys(p, 1);
-	playerMoveMap(p, &(SDL_Rect){wb, b, wh/2, wh});
+	setMapRect(playerGetMap(p), &(SDL_Rect){wb, b, wh/2, wh});
 	Player *q = newPlayer(2);
 	playerSetKeys(q, 0);
-	playerMoveMap(q, &(SDL_Rect){ww/2+wb, b, wh/2, wh});
+	setMapRect(playerGetMap(q), &(SDL_Rect){ww/2+wb, b, wh/2, wh});
 
 	uint32_t last, current, start, end;
 	last = SDL_GetTicks();
@@ -43,6 +43,8 @@ void doubleplayer() {
 			}
 		}
 
+		playerUpdate(p);
+		playerUpdate(q);
 		SDL_RenderClear(getRenderer());
 		playerDraw(p);
 		playerDraw(q);

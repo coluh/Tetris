@@ -37,6 +37,8 @@ void updatePlayerLocktime(Player *p);
 void playerDraw(Player *p);
 
 void playerHandleKey(Player *p, int key);
+void playerHandleKeyUp(Player *p, int key);
+void playerUpdate(Player *p);
 void playerForward(Player *p);
 
 

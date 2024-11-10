@@ -30,9 +30,13 @@ typedef struct ArrayInt {
 typedef struct ArrayString {
 	char **data;
 	int length;
+	int capacity;
 } ArrayString;
 
 void ArrayIntCopy(ArrayInt *dst, const ArrayInt *src);
+
+void arrayStringAdd(ArrayString *a, const char *str);
+void freeArrayString(ArrayString a);
 
 #define newArrayInt(p, len) (ArrayInt){ .data=p, .length=len };
 

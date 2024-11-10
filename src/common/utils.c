@@ -84,3 +84,24 @@ void printError(const char *msg, const char *file, int line, const char *functio
 	fflush(stderr);
 }
 
+void arrayStringAdd(ArrayString *a, const char *str) {
+	if (a->data == NULL) {
+		a->data = calloc(4, sizeof(char*));
+		a->length = 0;
+		a->capacity = 4;
+	}
+	if (a->length == a->capacity) {
+		a->data = realloc(a->data, a->capacity*2 * sizeof(char*));
+		a->capacity *= 2;
+	}
+
+	a->data[a->length] = strdup(str);
+	a->length++;
+}
+
+void freeArrayString(ArrayString a) {
+	for (int i = 0; i < a.length; i++)
+		free(a.data[i]);
+	free(a.data);
+}
+
