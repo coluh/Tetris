@@ -41,6 +41,10 @@ void doubleplayer() {
 				playerHandleKey(p, event.key.keysym.sym);
 				playerHandleKey(q, event.key.keysym.sym);
 			}
+			if (event.type == SDL_KEYUP) {
+				playerHandleKeyUp(p, event.key.keysym.sym);
+				playerHandleKeyUp(q, event.key.keysym.sym);
+			}
 		}
 
 		playerUpdate(p);

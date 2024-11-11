@@ -16,6 +16,12 @@
 #define OPT_PAUSE	8
 #define OPT_NUM		9
 
+typedef enum KeyState {
+	KEY_Down,
+	KEY_Up,
+	KEY_IsDown,
+} KeyState;
+
 typedef struct Player Player;
 
 void initPlayerConfig();
@@ -36,8 +42,8 @@ void updatePlayerLocktime(Player *p);
 
 void playerDraw(Player *p);
 
-void playerHandleKey(Player *p, int key);
-void playerHandleKeyUp(Player *p, int key);
+void playerHandleKey(Player *p, int k);
+void playerHandleKeyUp(Player *p, int k);
 void playerUpdate(Player *p);
 void playerForward(Player *p);
 

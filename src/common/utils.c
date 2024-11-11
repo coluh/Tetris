@@ -25,7 +25,6 @@ void shuffle(int *array, int n) {
 		return;
 
 	srand(time(0) + clock());
-	Debug("srand with %d", (int)time(0) + (int)clock());
 
 	for (int i = n - 1; i > 0; i--) {
 		int j = rand() % (i + 1);

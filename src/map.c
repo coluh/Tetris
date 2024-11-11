@@ -33,9 +33,6 @@ struct Map {
 	// Layout
 	SDL_Rect rect;
 	List *dropEffects;
-
-	void (*updateAnime)(struct Map *this, void *cmd);
-	bool animating;
 };
 
 struct DropEffect {
@@ -75,8 +72,6 @@ static void setBlockAt(Map *map, int x, int y, BlockType bt) {
 	map->block[x + y * fieldWidth] = bt;
 }
 
-void updateAnime(struct Map *this, void *cmd);
-
 Map *newMap(SDL_Rect *rect) {
 	Map *m = calloc(1, sizeof(struct Map));
 	m->block = calloc(fieldWidth * fieldHeight, sizeof(BlockType));
@@ -96,8 +91,6 @@ Map *newMap(SDL_Rect *rect) {
 		wh -= 2 * fieldMargin;
 		m->rect = Rect(ww / 3, fieldMargin, wh/2, wh);
 	}
-
-	m->updateAnime = updateAnime;
 
 	return m;
 }
@@ -151,7 +144,8 @@ bool hasHold(Map *map) {
 }
 
 int move(Map *map, int dx, int dy) {
-	Assert(map->falling != NULL, "move() when no falling block");
+	if (map->falling == NULL)
+		return 1;
 	map->falling->x += dx;
 	map->falling->y += dy;
 	if (stuck(map)) {
@@ -172,6 +166,8 @@ bool reachBottom(Map *map) {
 }
 
 void drop(Map *map) {
+	if (map->falling == NULL)
+		return;
 	while (move(map, 0, -1) == 0)
 		;
 
@@ -218,7 +214,8 @@ int iKickData[8][4][2] = {
 	{{-1,0},{2,0},{-1,2},{2,-1}},
 };
 int rotate(Map *map, int times) {
-	Assert(map->falling != NULL, "rotate() when no falling block");
+	if (map->falling == NULL)
+		return 1;
 	Assert(times == 1 || times == 3, "rotate 180 not implemented");
 	int type;
 	if (times == 1) {
@@ -247,7 +244,7 @@ int rotate(Map *map, int times) {
 	return 1;
 }
 
-void hold(Map *map) {
+void holdb(Map *map) {
 	if (map->usedHold) return;
 	if (map->hold == BLOCK_NE) {
 		map->hold = map->falling->type;
@@ -267,6 +264,8 @@ void hold(Map *map) {
 }
 
 void lock(Map *map) {
+	if (map->falling == NULL)
+		return;
 	Assert(map->falling != NULL, "lock when no falling block");
 	const int (*shape)[2] = getBlockShape(map->falling->type, map->falling->rotate);
 	for (int i = 0; i < 4; i++) {
@@ -350,7 +349,6 @@ int putBlock(Map *map, BlockType b) {
 static void drawDropEffect(Map *m, struct DropEffect *eff);
 
 void drawMap(Map *m) {
-	m->updateAnime(m, NULL);
 	SDL_Renderer *r = getRenderer();
 	SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
 	SDL_RenderFillRect(r, &m->rect);
@@ -497,51 +495,3 @@ static void drawDropEffect(Map *m, struct DropEffect *eff) {
 	}
 }
 
-void shakeMap(Map *m, int dx, int dy, int dt) {
-	static Map *map = NULL;
-	if (map == NULL) {
-		map = m;
-	} else {
-		if (map != m)
-			return;
-	}
-	if (m->animating)
-		return;
-	updateAnime(m, (int []){
-		111, dx, dy, dt
-	});
-	m->animating = true;
-}
-
-void updateAnime(Map *map, void *cmd) {
-	static int mapx, mapy;
-	static int dx, dy, dt;
-	static int t = 0;
-	static int shaking = 0;
-
-	if (cmd != NULL) {
-		int *cmds = cmd;
-		if (cmds[0] == 111) {
-			mapx = map->rect.x;
-			mapy = map->rect.y;
-			dx = cmds[1];
-			dy = cmds[2];
-			dt = cmds[3];
-			shaking = 1;
-		}
-		return;
-	}
-
-	if (shaking) {
-		map->rect.x = mapx + dx - sign(dx) * abs(dx - 2 * dx * t / dt);
-		map->rect.y = mapy + dy - sign(dy) * abs(dy - 2 * dy * t / dt);
-		t++;
-		if (t >= dt) {
-			t = 0;
-			shaking = 0;
-			map->rect.x = mapx;
-			map->rect.y = mapy;
-			map->animating = false;
-		}
-	}
-}

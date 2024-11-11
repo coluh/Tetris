@@ -23,7 +23,7 @@ void drop(Map *map);
 // rotate clockwise for times
 int rotate(Map *map, int times);
 // hold
-void hold(Map *map);
+void holdb(Map *map);
 // lock map->falling to map->block
 void lock(Map *map);
 // return lines cleared
@@ -40,7 +40,5 @@ void drawMap(Map *m);
 void drawBag(Map *m);
 void drawHold(Map *m);
 void drawLocktime(Map *map);
-
-void shakeMap(Map *m, int dx, int dy, int dt);
 
 #endif // __MAP_H__
