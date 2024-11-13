@@ -178,12 +178,12 @@ void updatePlayerLocktime(Player *p) {
 static void left(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
+		if (move(p->map, -1, 0) == 0 && reachBottom(p->map))
+			updatePlayerLocktime(p);
 		p->movePressing = true;
 		p->dasFrame = 0;
 		break;
 	case KEY_Up:
-		if (move(p->map, -1, 0) == 0 && reachBottom(p->map))
-			updatePlayerLocktime(p);
 		p->movePressing = false;
 		p->fast = false;
 		p->dasFrame = 0;
@@ -206,17 +206,17 @@ static void left(Player *p, KeyState state) {
 static void right(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
+		if (move(p->map, 1, 0) == 0 && reachBottom(p->map))
+			updatePlayerLocktime(p);
 		p->movePressing = true;
 		p->dasFrame = 0;
 		break;
 	case KEY_Up:
-		if (move(p->map, 1, 0) == 0 && reachBottom(p->map))
-			updatePlayerLocktime(p);
-		break;
 		p->movePressing = false;
 		p->fast = false;
 		p->dasFrame = 0;
 		p->arrFrame = 0;
+		break;
 	case KEY_IsDown:
 		// FIX: if you press left and right in one time, speed will double
 		p->movePressing = true;
@@ -252,12 +252,12 @@ static void soft(Player *p, KeyState state) {
 static void hard(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
-		break;
-	case KEY_Up:
 		drop(p->map);
 		effectFall();
 		checkLineWrapper(p);
 		playerForward(p);
+		break;
+	case KEY_Up:
 		break;
 	case KEY_IsDown:
 		break;
@@ -267,13 +267,13 @@ static void hard(Player *p, KeyState state) {
 static void rotater(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
-		break;
-	case KEY_Up:
 		if (rotate(p->map, 3) == 0) {
 			effectRotate();
 			if (reachBottom(p->map))
 				updatePlayerLocktime(p);
 		}
+		break;
+	case KEY_Up:
 		break;
 	case KEY_IsDown:
 		break;
@@ -283,13 +283,13 @@ static void rotater(Player *p, KeyState state) {
 static void rotatec(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
-		break;
-	case KEY_Up:
 		if (rotate(p->map, 1) == 0) {
 			effectRotate();
 			if (reachBottom(p->map))
 				updatePlayerLocktime(p);
 		}
+		break;
+	case KEY_Up:
 		break;
 	case KEY_IsDown:
 		break;
@@ -299,8 +299,6 @@ static void rotatec(Player *p, KeyState state) {
 static void hold(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
-		break;
-	case KEY_Up:
 		if (!hasHold(p->map)) {
 			holdb(p->map);
 			putBlock(p->map, popBlock(p->bag));
@@ -308,6 +306,8 @@ static void hold(Player *p, KeyState state) {
 			holdb(p->map);
 		}
 		p->locktime = 0;
+		break;
+	case KEY_Up:
 		break;
 	case KEY_IsDown:
 		break;
@@ -319,8 +319,6 @@ static void pause(Player *p, KeyState state) {
 	bool waiting = true;
 	switch (state) {
 	case KEY_Down:
-		break;
-	case KEY_Up:
 		while (waiting) {
 			SDL_WaitEvent(&e);
 			if (e.type == SDL_QUIT || e.type == SDL_KEYDOWN) {
@@ -328,32 +326,30 @@ static void pause(Player *p, KeyState state) {
 			}
 		}
 		break;
+	case KEY_Up:
+		break;
 	case KEY_IsDown:
 		break;
 	}
 }
 
 void playerHandleKey(Player *p, int k) {
-	int i = 0;
-	while (1) {
+	for (int i = 0; ; i++) {
 		int key = p->keymap[i].key;
 		if (key == 0)
 			break;
 		if (SDL_GetScancodeFromKey(k) == key)
 			p->keymap[i].f(p, KEY_Down);
-		i++;
 	}
 }
 
 void playerHandleKeyUp(Player *p, int k) {
-	int i = 0;
-	while (1) {
+	for (int i = 0; ; i++) {
 		int key = p->keymap[i].key;
 		if (key == 0)
 			break;
 		if (SDL_GetScancodeFromKey(k) == key)
 			p->keymap[i].f(p, KEY_Up);
-		i++;
 	}
 }
 
@@ -372,14 +368,12 @@ void playerUpdate(Player *p) {
 
 	const uint8_t *state = SDL_GetKeyboardState(NULL);
 
-	int i = 0;
-	while (1) {
+	for (int i = 0; ; i++) {
 		int key = p->keymap[i].key;
 		if (key == 0)
 			break;
 		if (state[key])
 			p->keymap[i].f(p, KEY_IsDown);
-		i++;
 	}
 }
 
