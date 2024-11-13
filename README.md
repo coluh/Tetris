@@ -3,19 +3,15 @@
 
 ### FREATURES
 
-- [x] Ghost Block
-- [x] Hold
-- [x] Score Module
 - [x] SRS
-- [ ] T-Spins
+- [ ] T-Spins, other Spins
 - [x] Lock Down Delay
+- [ ] More Game Modes
 - [ ] Background Music
 - [x] Logo
-- [ ] More Game Modes
 
 - [x] Start Menu Background Animation
-- [x] Config Module
-- [x] Move(drop, kick) Visual Effects
+- [ ] Visual Effects
 - [ ] Sound Effects
 - [x] DoublePlayer
 - [ ] Web
