@@ -1,73 +1,30 @@
 #include "music.h"
 #include "common/utils.h"
+#include "config/config.h"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_audio.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_stdinc.h>
+#include <math.h>
 #include <stdlib.h>
 
 #define AMPLITUDE 4000
 
+static Mix_Chunk *sounds[5];
+
 void initMusic() {
 	SDL_Init(SDL_INIT_AUDIO);
-	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+	Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 4096);
+	sounds[SoundEffect_move] = Mix_LoadWAV(getConfigString(KeyChain { "sounds", "move" }, 2));
+	sounds[SoundEffect_rotate] = Mix_LoadWAV(getConfigString(KeyChain { "sounds", "rotate" }, 2));
+	sounds[SoundEffect_drop] = Mix_LoadWAV(getConfigString(KeyChain { "sounds", "drop" }, 2));
+	sounds[SoundEffect_clear] = Mix_LoadWAV(getConfigString(KeyChain { "sounds", "clear" }, 2));
+	sounds[SoundEffect_explode] = Mix_LoadWAV(getConfigString(KeyChain { "sounds", "explode" }, 2));
 }
 
-void effectFall() {
-	static Mix_Chunk fallEffect;
-
-	if (fallEffect.allocated == 0) {
-
-		fallEffect.allocated = 1;
-		fallEffect.volume = MIX_MAX_VOLUME;
-
-		int length = 4096;
-		Sint16 *buffer = calloc(length, sizeof(Sint16));
-
-		float lamda = 20;
-		int t = 0;
-		for (int i = 0; i < length; i++) {
-			if ((int)(t/lamda) % 2 == 0)
-				buffer[i] = AMPLITUDE/2;
-			else
-				buffer[i] = -AMPLITUDE/2;
-
-			t++;
-			lamda += 0.015;
-		}
-
-		fallEffect.abuf = (Uint8*)buffer;
-		fallEffect.alen = length * sizeof(Sint16);
-
-	}
-
-	Mix_PlayChannel(-1, &fallEffect, 0);
-}
-
-void effectRotate() {
-	static Mix_Chunk eff;
-
-	if (eff.allocated == 0) {
-
-		eff.allocated = 1;
-		eff.volume = MIX_MAX_VOLUME;
-
-		int length = 4096;
-		Sint16 *buffer = calloc(length, sizeof(Sint16));
-
-		for (int i = 0; i < length; i++) {
-			float k = (float)(length - i) / length;
-			k *= k;
-			k *= 0.9;
-			k += 0.1;
-			buffer[i] = getrand(0, AMPLITUDE * k);
-		}
-
-		eff.abuf = (Uint8*)buffer;
-		eff.alen = length * sizeof(Sint16);
-	}
-
-	Mix_PlayChannel(-1, &eff, 0);
+void playSound(SoundEffect soundEffect) {
+	Mix_PlayChannel(-1, sounds[soundEffect], 0);
 }
 
 void freeMusic() {

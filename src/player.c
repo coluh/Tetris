@@ -153,6 +153,10 @@ static void checkLineWrapper(Player *p) {
 		p->score.combo = 0;
 		return;
 	}
+	if (line < 4)
+		playSound(SoundEffect_clear);
+	else
+		playSound(SoundEffect_explode);
 	p->score.combo++;
 	p->score.lines += line;
 	int k[5] = { 0, 100, 300, 500, 800};
@@ -178,8 +182,11 @@ void updatePlayerLocktime(Player *p) {
 static void left(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
-		if (move(p->map, -1, 0) == 0 && reachBottom(p->map))
-			updatePlayerLocktime(p);
+		if (move(p->map, -1, 0) == 0) {
+			playSound(SoundEffect_move);
+			if (reachBottom(p->map))
+				updatePlayerLocktime(p);
+		}
 		p->movePressing = true;
 		p->dasFrame = 0;
 		break;
@@ -195,8 +202,11 @@ static void left(Player *p, KeyState state) {
 			p->arrFrame++;
 			if (p->arrFrame == ARR) {
 				p->arrFrame = 0;
-				if (move(p->map, -1, 0) == 0 && reachBottom(p->map))
-					updatePlayerLocktime(p);
+				if (move(p->map, -1, 0) == 0) {
+					playSound(SoundEffect_move);
+					if (reachBottom(p->map))
+						updatePlayerLocktime(p);
+				}
 			}
 		}
 		break;
@@ -206,8 +216,11 @@ static void left(Player *p, KeyState state) {
 static void right(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
-		if (move(p->map, 1, 0) == 0 && reachBottom(p->map))
-			updatePlayerLocktime(p);
+		if (move(p->map, 1, 0) == 0) {
+			playSound(SoundEffect_move);
+			if (reachBottom(p->map))
+				updatePlayerLocktime(p);
+		}
 		p->movePressing = true;
 		p->dasFrame = 0;
 		break;
@@ -224,8 +237,11 @@ static void right(Player *p, KeyState state) {
 			p->arrFrame++;
 			if (p->arrFrame == ARR) {
 				p->arrFrame = 0;
-				if (move(p->map, 1, 0) == 0 && reachBottom(p->map))
-					updatePlayerLocktime(p);
+				if (move(p->map, 1, 0) == 0) {
+					playSound(SoundEffect_move);
+					if (reachBottom(p->map))
+						updatePlayerLocktime(p);
+				}
 			}
 		}
 		break;
@@ -253,7 +269,7 @@ static void hard(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
 		drop(p->map);
-		effectFall();
+		playSound(SoundEffect_drop);
 		checkLineWrapper(p);
 		playerForward(p);
 		break;
@@ -268,7 +284,7 @@ static void rotater(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
 		if (rotate(p->map, 3) == 0) {
-			effectRotate();
+			playSound(SoundEffect_rotate);
 			if (reachBottom(p->map))
 				updatePlayerLocktime(p);
 		}
@@ -284,7 +300,7 @@ static void rotatec(Player *p, KeyState state) {
 	switch (state) {
 	case KEY_Down:
 		if (rotate(p->map, 1) == 0) {
-			effectRotate();
+			playSound(SoundEffect_rotate);
 			if (reachBottom(p->map))
 				updatePlayerLocktime(p);
 		}

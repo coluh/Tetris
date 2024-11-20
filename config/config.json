@@ -47,6 +47,13 @@
 		"menuPadding": 40,
 		"fieldMargin": 20,
 	},
+	"sounds": {
+		"move": "./assets/drop.wav",
+		"rotate": "./assets/rotate.wav",
+		"drop": "./assets/drop.wav",
+		"clear": "./assets/explode.wav",
+		"explode": "./assets/explosion.wav",
+	},
 	"color": {
 		"font": {
 			"inactive": [ 255, 255, 255, 255 ],
